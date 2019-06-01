@@ -26,7 +26,7 @@ class SqueezeExcitation(nn.Module):
 
     def __init__(self, num_features, reduction_ratio=4):
         super(SqueezeExcitation, self).__init__()
-        hidden_dim = int(num_features / reduction_ratio)
+        hidden_dim = max(1, int(num_features / reduction_ratio))
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(num_features, hidden_dim, 1, bias=True),
@@ -87,8 +87,8 @@ class EfficientNet(nn.Module):
             [1,  16, 1, 1, 3],  # MBConv1_3x3, SE, 112 -> 112
             [6,  24, 2, 2, 3],  # MBConv6_3x3, SE, 112 ->  56
             [6,  40, 2, 2, 5],  # MBConv6_5x5, SE,  56 ->  28
-            [6,  80, 3, 1, 3],  # MBConv6_3x3, SE,  28 ->  28
-            [6, 112, 3, 2, 5],  # MBConv6_5x5, SE,  28 ->  14
+            [6,  80, 3, 2, 3],  # MBConv6_3x3, SE,  28 ->  14
+            [6, 112, 3, 1, 5],  # MBConv6_5x5, SE,  14 ->  14
             [6, 192, 4, 2, 5],  # MBConv6_5x5, SE,  14 ->   7
             [6, 320, 1, 1, 3]   # MBConv6_3x3, SE,   7 ->   7
         ]
