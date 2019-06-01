@@ -78,7 +78,7 @@ class EfficientNet(nn.Module):
     https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
     """
 
-    def __init__(self, num_classes=1000, width_mult=1.0, depth=1.0, resolution=1.0):
+    def __init__(self, num_classes=1000, width_mult=1.0, depth_mult=1.0, resolution=1.0, dropout_rate=0.2):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -108,7 +108,7 @@ class EfficientNet(nn.Module):
         self.features = nn.Sequential(*features)
         self.avg_pool = nn.AvgPool2d(kernel_size=7)
         self.classifier = nn.Sequential(
-            nn.Dropout(0.2),
+            nn.Dropout(dropout_rate),
             nn.Linear(1280, num_classes),
         )
 
@@ -124,6 +124,10 @@ def efficientnet_b0():
     return EfficientNet()
 
 
+def numel(model: nn.Module):
+    return sum(p.numel() for p in model.parameters())
+
+
 def main():
     import torch
     m = EfficientNet()
@@ -131,6 +135,8 @@ def main():
     with torch.no_grad():
         y = m(x)
         print(y.size())
+
+    print(numel(m))
 
 
 if __name__ == "__main__":
