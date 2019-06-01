@@ -24,14 +24,13 @@ class ConvBNReLU(nn.Sequential):
 
 class SqueezeExcitation(nn.Module):
 
-    def __init__(self, num_features, reduction_ratio=4):
+    def __init__(self, in_planes, reduced_dim):
         super(SqueezeExcitation, self).__init__()
-        hidden_dim = max(1, int(num_features / reduction_ratio))
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(num_features, hidden_dim, 1, bias=True),
+            nn.Conv2d(in_planes, reduced_dim, 1, bias=True),
             Swish(),
-            nn.Conv2d(hidden_dim, num_features, 1, bias=True),
+            nn.Conv2d(reduced_dim, in_planes, 1, bias=True),
             nn.Sigmoid(),
         )
 
@@ -41,15 +40,16 @@ class SqueezeExcitation(nn.Module):
 
 class MBConvBlock(nn.Module):
 
-    def __init__(self, in_planes, out_planes, expand_ratio, kernel_size, stride):
+    def __init__(self, in_planes, out_planes, expand_ratio, kernel_size, stride, reduction_ratio=4):
         super(MBConvBlock, self).__init__()
         self.use_residual = in_planes == out_planes and stride == 1
         assert stride in [1, 2]
         assert kernel_size in [3, 5]
 
         hidden_dim = int(in_planes * expand_ratio)
-        layers = []
+        reduced_dim = max(1, int(in_planes / reduction_ratio))
 
+        layers = []
         # pw
         if in_planes != hidden_dim:
             layers += [ConvBNReLU(in_planes, hidden_dim, 1)]
@@ -58,7 +58,7 @@ class MBConvBlock(nn.Module):
             # dw
             ConvBNReLU(hidden_dim, hidden_dim, kernel_size, stride=stride, groups=hidden_dim),
             # se
-            SqueezeExcitation(hidden_dim),
+            SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
             nn.Conv2d(hidden_dim, out_planes, 1, bias=False),
             nn.BatchNorm2d(out_planes),
