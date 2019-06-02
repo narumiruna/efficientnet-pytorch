@@ -9,7 +9,7 @@ model:
   in_channels: 3
 
 dataset:
-  name: cifar10_dataloaders
+  name: imagenet_dataloaders
   root: data
   batch_size: 128
   image_size: 64
