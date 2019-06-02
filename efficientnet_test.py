@@ -1,6 +1,6 @@
 import torch
 
-from efficientnet.models.efficientnet import EfficientNet
+from efficientnet.models import EfficientNet
 
 
 def numel(model):
@@ -39,7 +39,7 @@ def main():
     for arch, (w, d, s, r) in params.items():
         model = EfficientNet(w, d, r)
 
-        print(f'Arch: {arch}, settings: {(w, d, s, r) }')
+        print(f'Arch: {arch}, settings: {(w, d, s, r)}')
         test_output(model, s)
         print_num_parameters(model)
 
