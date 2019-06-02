@@ -17,8 +17,8 @@ dataset:
 
 optimizer:
   name: SGD
-  lr: 1e-3
-  weight_decay: 1e-4
+  lr: 0.001
+  weight_decay: 0.0001
 
 scheduler:
   name: StepLR
