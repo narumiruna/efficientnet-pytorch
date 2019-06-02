@@ -11,7 +11,8 @@ dataset:
   name: mnist_dataloaders
   root: data
   batch_size: 128
-  image_size: 224
+  image_size: 32
+  num_workers: 0
 
 optimizer:
   name: SGD

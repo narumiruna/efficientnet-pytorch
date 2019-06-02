@@ -56,9 +56,9 @@ class Trainer(AbstractTrainer):
                 self.best_acc = valid_acc.accuracy
                 self.save_checkpoint(epoch)
 
-            print(f'Epoch: {epoch}/{self.num_epochs}'
+            print(f'Epoch: {epoch}/{self.num_epochs}, '
                   f'train loss: {train_loss}, train acc: {train_acc}, '
-                  f'test loss: {valid_loss}, valid acc: {valid_acc}, '
+                  f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
                   f'best valid acc: {self.best_acc * 100:.2f}')
 
     def train(self):
