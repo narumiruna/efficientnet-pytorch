@@ -17,7 +17,7 @@ class ConvBNReLU(nn.Sequential):
         padding = (kernel_size - 1) // 2
         super(ConvBNReLU, self).__init__(
             nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding, groups=groups, bias=False),
-            nn.BatchNorm2d(out_planes),
+            nn.BatchNorm2d(out_planes, momentum=0.01),
             Swish(),
         )
 
@@ -61,7 +61,7 @@ class MBConvBlock(nn.Module):
             SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
             nn.Conv2d(hidden_dim, out_planes, 1, bias=False),
-            nn.BatchNorm2d(out_planes),
+            nn.BatchNorm2d(out_planes, momentum=0.01),
         ]
 
         self.conv = nn.Sequential(*layers)
