@@ -2,6 +2,19 @@
 
 https://arxiv.org/abs/1905.11946
 
+## Usage
+
+### Train on MNIST dataset
+
+```shell
+$ python train.py -c configs/mnist.yaml
+```
+
+### Train on CIFAR10 dataset
+
+```shell
+$ python train.py -c configs/cifar10.yaml
+```
 
 ## References
 
