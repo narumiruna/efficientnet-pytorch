@@ -17,7 +17,7 @@ class ConvBNReLU(nn.Sequential):
         padding = (kernel_size - 1) // 2
         super(ConvBNReLU, self).__init__(
             nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding, groups=groups, bias=False),
-            nn.BatchNorm2d(out_planes, momentum=0.01),
+            nn.BatchNorm2d(out_planes, eps=1e-3, momentum=0.01),
             Swish(),
         )
 
@@ -61,7 +61,7 @@ class MBConvBlock(nn.Module):
             SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
             nn.Conv2d(hidden_dim, out_planes, 1, bias=False),
-            nn.BatchNorm2d(out_planes, momentum=0.01),
+            nn.BatchNorm2d(out_planes, eps=1e-3, momentum=0.01),
         ]
 
         self.conv = nn.Sequential(*layers)
@@ -78,7 +78,7 @@ class EfficientNet(nn.Module):
     https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
     """
 
-    def __init__(self, num_classes=1000, width_mult=1.0, depth_mult=1.0, resolution=1.0, dropout_rate=0.2):
+    def __init__(self, num_classes=1000, width_mult=1.0, depth_mult=1.0, resolution=224, dropout_rate=0.2):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -93,6 +93,7 @@ class EfficientNet(nn.Module):
             [6, 320, 1, 1, 3]   # MBConv6_3x3, SE,   7 ->   7
         ]
         # yapf: enable
+        last_channel = int(1280 * max(1.0, width_mult))
 
         features = [ConvBNReLU(3, int(32 * width_mult), 3, stride=2)]
 
@@ -104,24 +105,22 @@ class EfficientNet(nn.Module):
                 features += [MBConvBlock(in_channels, out_channels, expand_ratio=t, stride=stride, kernel_size=k)]
                 in_channels = out_channels
 
-        features += [ConvBNReLU(in_channels, 1280, 1)]
+        features += [ConvBNReLU(in_channels, last_channel, 1)]
         self.features = nn.Sequential(*features)
-        self.avg_pool = nn.AvgPool2d(kernel_size=7)
         self.classifier = nn.Sequential(
             nn.Dropout(dropout_rate),
-            nn.Linear(1280, num_classes),
+            nn.Linear(last_channel, num_classes),
         )
 
     def forward(self, x):
         x = self.features(x)
-        x = self.avg_pool(x)
-        x = x.view(x.size(0), -1)
+        x = x.mean([2, 3])
         x = self.classifier(x)
         return x
 
 
-def efficientnet_b0():
-    return EfficientNet()
+def efficientnet_b0(pretrained=False, progress=True, **kwargs):
+    return EfficientNet(width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, **kwargs)
 
 
 def numel(model: nn.Module):
@@ -130,8 +129,9 @@ def numel(model: nn.Module):
 
 def main():
     import torch
-    m = EfficientNet()
-    x = torch.randn(1, 3, 224, 224)
+    m = efficientnet_b0()
+    m.eval()
+    x = torch.randn(2, 3, 224, 224)
     with torch.no_grad():
         y = m(x)
         print(y.size())
