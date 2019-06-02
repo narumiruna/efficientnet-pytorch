@@ -1,3 +1,5 @@
+import math
+
 from torch import nn
 
 
@@ -73,6 +75,10 @@ class MBConvBlock(nn.Module):
             return self.conv(x)
 
 
+def round_repeats(depth_mult, repeats):
+    return int(math.ceil(depth_mult * repeats))
+
+
 class EfficientNet(nn.Module):
     """
     https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
@@ -100,7 +106,8 @@ class EfficientNet(nn.Module):
         in_channels = int(32 * width_mult)
         for t, c, n, s, k in settings:
             out_channels = int(c * width_mult)
-            for i in range(n):
+            repeats = round_repeats(depth_mult, n)
+            for i in range(repeats):
                 stride = s if i == 0 else 1
                 features += [MBConvBlock(in_channels, out_channels, expand_ratio=t, stride=stride, kernel_size=k)]
                 in_channels = out_channels
