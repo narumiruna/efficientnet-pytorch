@@ -22,4 +22,4 @@ optimizer:
 
 scheduler:
   name: StepLR
-  step_size: 10
+  step_size: 100
