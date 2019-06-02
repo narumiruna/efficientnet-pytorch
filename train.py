@@ -42,7 +42,7 @@ parser.add_argument(
     'batch size of all GPUs on the current node when '
     'using Data Parallel or Distributed Data Parallel')
 parser.add_argument(
-    '--lr', '--learning-rate', default=0.256, type=float, metavar='LR', help='initial learning rate', dest='lr')
+    '--lr', '--learning-rate', default=0.1, type=float, metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
 parser.add_argument(
     '--wd',
@@ -157,8 +157,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
 
-    optimizer = torch.optim.RMSprop(
-        model.parameters(), args.lr, alpha=0.9, momentum=args.momentum, weight_decay=args.weight_decay)
+    optimizer = torch.optim.SGD(model.parameters(), args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -382,8 +381,8 @@ class ProgressMeter(object):
 
 
 def adjust_learning_rate(optimizer, epoch, args):
-    """Sets the learning rate to the initial LR decayed by 0.97 every 2.4 epochs"""
-    lr = args.lr - 0.97 * (epoch // 2.4)
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = args.lr * (0.1**(epoch // 30))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
