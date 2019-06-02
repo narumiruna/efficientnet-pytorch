@@ -2,6 +2,17 @@ import math
 
 from torch import nn
 
+EFFICIENTNET_PARAMS = {
+    'efficientnet-b0': (1.0, 1.0, 224, 0.2),
+    'efficientnet-b1': (1.0, 1.1, 240, 0.2),
+    'efficientnet-b2': (1.1, 1.2, 260, 0.3),
+    'efficientnet-b3': (1.2, 1.4, 300, 0.3),
+    'efficientnet-b4': (1.4, 1.8, 380, 0.4),
+    'efficientnet-b5': (1.6, 2.2, 456, 0.4),
+    'efficientnet-b6': (1.8, 2.6, 528, 0.5),
+    'efficientnet-b7': (2.0, 3.1, 600, 0.5),
+}
+
 
 class Swish(nn.Module):
 
@@ -30,9 +41,9 @@ class SqueezeExcitation(nn.Module):
         super(SqueezeExcitation, self).__init__()
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(in_planes, reduced_dim, 1, bias=True),
+            nn.Conv2d(in_planes, reduced_dim, 1),
             Swish(),
-            nn.Conv2d(reduced_dim, in_planes, 1, bias=True),
+            nn.Conv2d(reduced_dim, in_planes, 1),
             nn.Sigmoid(),
         )
 
@@ -48,7 +59,7 @@ class MBConvBlock(nn.Module):
         assert stride in [1, 2]
         assert kernel_size in [3, 5]
 
-        hidden_dim = int(in_planes * expand_ratio)
+        hidden_dim = in_planes * expand_ratio
         reduced_dim = max(1, int(in_planes / reduction_ratio))
 
         layers = []
@@ -75,16 +86,28 @@ class MBConvBlock(nn.Module):
             return self.conv(x)
 
 
-def round_repeats(depth_mult, repeats):
+def _make_divisible(value, divisor=8):
+    new_value = max(divisor, int(value + divisor / 2) // divisor * divisor)
+    if new_value < 0.9 * value:
+        new_value += divisor
+    return new_value
+
+
+def _round_filters(filters, width_mult):
+    if width_mult == 1.0:
+        return filters
+    return int(_make_divisible(filters * width_mult))
+
+
+def _round_repeats(repeats, depth_mult):
+    if depth_mult == 1.0:
+        return repeats
     return int(math.ceil(depth_mult * repeats))
 
 
 class EfficientNet(nn.Module):
-    """
-    https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
-    """
 
-    def __init__(self, num_classes=1000, width_mult=1.0, depth_mult=1.0, resolution=224, dropout_rate=0.2):
+    def __init__(self, num_classes=1001, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -99,24 +122,25 @@ class EfficientNet(nn.Module):
             [6, 320, 1, 1, 3]   # MBConv6_3x3, SE,   7 ->   7
         ]
         # yapf: enable
-        last_channel = int(1280 * max(1.0, width_mult))
 
-        features = [ConvBNReLU(3, int(32 * width_mult), 3, stride=2)]
+        in_channels = _round_filters(32, width_mult)
+        last_channels = _round_filters(1280, width_mult)
 
-        in_channels = int(32 * width_mult)
+        features = [ConvBNReLU(3, in_channels, 3, stride=2)]
+
         for t, c, n, s, k in settings:
-            out_channels = int(c * width_mult)
-            repeats = round_repeats(depth_mult, n)
+            out_channels = _round_filters(c, width_mult)
+            repeats = _round_repeats(n, depth_mult)
             for i in range(repeats):
                 stride = s if i == 0 else 1
                 features += [MBConvBlock(in_channels, out_channels, expand_ratio=t, stride=stride, kernel_size=k)]
                 in_channels = out_channels
 
-        features += [ConvBNReLU(in_channels, last_channel, 1)]
+        features += [ConvBNReLU(in_channels, last_channels, 1)]
         self.features = nn.Sequential(*features)
         self.classifier = nn.Sequential(
             nn.Dropout(dropout_rate),
-            nn.Linear(last_channel, num_classes),
+            nn.Linear(last_channels, num_classes),
         )
 
     def forward(self, x):
@@ -127,24 +151,9 @@ class EfficientNet(nn.Module):
 
 
 def efficientnet_b0(pretrained=False, progress=True, **kwargs):
-    return EfficientNet(width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, **kwargs)
+    return efficientnet('efficientnet-b0', **kwargs)
 
 
-def numel(model: nn.Module):
-    return sum(p.numel() for p in model.parameters())
-
-
-def main():
-    import torch
-    m = efficientnet_b0()
-    m.eval()
-    x = torch.randn(2, 3, 224, 224)
-    with torch.no_grad():
-        y = m(x)
-        print(y.size())
-
-    print(numel(m))
-
-
-if __name__ == "__main__":
-    main()
+def efficientnet(name='efficientnet-b0', **kwargs):
+    width_mult, depth_mult, _, dropout_rate = EFFICIENTNET_PARAMS[name]
+    return EfficientNet(width_mult=width_mult, depth_mult=depth_mult, dropout_rate=dropout_rate, **kwargs)
