@@ -6,6 +6,7 @@ output_dir: experiments/mnist
 model:
   name: efficientnet_b0
   num_classes: 10
+  in_channels: 1
 
 dataset:
   name: mnist_dataloaders

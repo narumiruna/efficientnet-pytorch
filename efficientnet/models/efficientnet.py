@@ -127,7 +127,7 @@ def _round_repeats(repeats, depth_mult):
 
 class EfficientNet(nn.Module):
 
-    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000):
+    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000, in_channels=3):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -143,10 +143,9 @@ class EfficientNet(nn.Module):
         ]
         # yapf: enable
 
-        in_channels = _round_filters(32, width_mult)
-        last_channels = _round_filters(1280, width_mult)
-
-        features = [ConvBNReLU(3, in_channels, 3, stride=2)]
+        out_channels = _round_filters(32, width_mult)
+        features = [ConvBNReLU(in_channels, out_channels, 3, stride=2)]
+        in_channels = out_channels
 
         for t, c, n, s, k in settings:
             out_channels = _round_filters(c, width_mult)
@@ -156,7 +155,9 @@ class EfficientNet(nn.Module):
                 features += [MBConvBlock(in_channels, out_channels, expand_ratio=t, stride=stride, kernel_size=k)]
                 in_channels = out_channels
 
+        last_channels = _round_filters(1280, width_mult)
         features += [ConvBNReLU(in_channels, last_channels, 1)]
+
         self.features = nn.Sequential(*features)
         self.classifier = nn.Sequential(
             nn.Dropout(dropout_rate),
