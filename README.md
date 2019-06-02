@@ -1,4 +1,4 @@
-# efficientnet-pytorch
+# EfficientNet
 
 https://arxiv.org/abs/1905.11946
 
