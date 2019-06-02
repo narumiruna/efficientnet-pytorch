@@ -13,12 +13,21 @@ from efficientnet.trainer import Trainer
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
+    parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
     return parser.parse_args()
 
 
-def main():
+def load_config():
     args = parse_args()
     config = Config.from_yaml(args.config)
+
+    if args.root:
+        config.dataset.root = args.root
+    return config
+
+
+def main():
+    config = load_config()
     print(config)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
