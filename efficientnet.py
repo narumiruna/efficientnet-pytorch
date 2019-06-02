@@ -1,5 +1,6 @@
 import math
 
+import torch
 from torch import nn
 
 from utils import load_state_dict_from_url
@@ -55,8 +56,16 @@ class SqueezeExcitation(nn.Module):
 
 class MBConvBlock(nn.Module):
 
-    def __init__(self, in_planes, out_planes, expand_ratio, kernel_size, stride, reduction_ratio=4):
+    def __init__(self,
+                 in_planes,
+                 out_planes,
+                 expand_ratio,
+                 kernel_size,
+                 stride,
+                 reduction_ratio=4,
+                 drop_connect_rate=0.2):
         super(MBConvBlock, self).__init__()
+        self.drop_connect_rate = drop_connect_rate
         self.use_residual = in_planes == out_planes and stride == 1
         assert stride in [1, 2]
         assert kernel_size in [3, 5]
@@ -81,9 +90,19 @@ class MBConvBlock(nn.Module):
 
         self.conv = nn.Sequential(*layers)
 
+    def _drop_connect(self, x):
+        if not self.training:
+            return x
+        keep_prob = 1.0 - self.drop_connect_rate
+        batch_size = x.size(0)
+        random_tensor = keep_prob
+        random_tensor += torch.rand(batch_size, 1, 1, 1, device=x.device)
+        binary_tensor = random_tensor.floor()
+        return x.div(keep_prob) * binary_tensor
+
     def forward(self, x):
         if self.use_residual:
-            return x + self.conv(x)
+            return x + self._drop_connect(self.conv(x))
         else:
             return self.conv(x)
 
