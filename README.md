@@ -16,6 +16,11 @@ $ python train.py -c configs/mnist.yaml
 $ python train.py -c configs/cifar10.yaml
 ```
 
+## TO-DO
+
+- [ ] Support ImageNet dataset
+- [ ] Pre-trained weights
+
 ## References
 
 - https://arxiv.org/abs/1905.11946
