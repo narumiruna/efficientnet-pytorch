@@ -2,15 +2,17 @@ import math
 
 from torch import nn
 
-EFFICIENTNET_PARAMS = {
-    'efficientnet-b0': (1.0, 1.0, 224, 0.2),
-    'efficientnet-b1': (1.0, 1.1, 240, 0.2),
-    'efficientnet-b2': (1.1, 1.2, 260, 0.3),
-    'efficientnet-b3': (1.2, 1.4, 300, 0.3),
-    'efficientnet-b4': (1.4, 1.8, 380, 0.4),
-    'efficientnet-b5': (1.6, 2.2, 456, 0.4),
-    'efficientnet-b6': (1.8, 2.6, 528, 0.5),
-    'efficientnet-b7': (2.0, 3.1, 600, 0.5),
+from utils import load_state_dict_from_url
+
+model_urls = {
+    'efficientnet-b0': None,
+    'efficientnet-b1': None,
+    'efficientnet-b2': None,
+    'efficientnet-b3': None,
+    'efficientnet-b4': None,
+    'efficientnet-b5': None,
+    'efficientnet-b6': None,
+    'efficientnet-b7': None,
 }
 
 
@@ -107,7 +109,7 @@ def _round_repeats(repeats, depth_mult):
 
 class EfficientNet(nn.Module):
 
-    def __init__(self, num_classes=1001, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2):
+    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -150,10 +152,52 @@ class EfficientNet(nn.Module):
         return x
 
 
+def _efficientnet(arch, pretrained, progress, **kwargs):
+    params = {
+        'efficientnet-b0': (1.0, 1.0, 224, 0.2),
+        'efficientnet-b1': (1.0, 1.1, 240, 0.2),
+        'efficientnet-b2': (1.1, 1.2, 260, 0.3),
+        'efficientnet-b3': (1.2, 1.4, 300, 0.3),
+        'efficientnet-b4': (1.4, 1.8, 380, 0.4),
+        'efficientnet-b5': (1.6, 2.2, 456, 0.4),
+        'efficientnet-b6': (1.8, 2.6, 528, 0.5),
+        'efficientnet-b7': (2.0, 3.1, 600, 0.5),
+    }
+    width_mult, depth_mult, resolution, dropout_rate = params[arch]
+    model = EfficientNet(width_mult, depth_mult, dropout_rate, **kwargs)
+    if pretrained:
+        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+        model.load_state_dict(state_dict)
+    return model
+
+
 def efficientnet_b0(pretrained=False, progress=True, **kwargs):
-    return efficientnet('efficientnet-b0', **kwargs)
+    return _efficientnet('efficientnet-b0', pretrained, progress, **kwargs)
 
 
-def efficientnet(name='efficientnet-b0', **kwargs):
-    width_mult, depth_mult, _, dropout_rate = EFFICIENTNET_PARAMS[name]
-    return EfficientNet(width_mult=width_mult, depth_mult=depth_mult, dropout_rate=dropout_rate, **kwargs)
+def efficientnet_b1(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b1', pretrained, progress, **kwargs)
+
+
+def efficientnet_b2(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b2', pretrained, progress, **kwargs)
+
+
+def efficientnet_b3(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b3', pretrained, progress, **kwargs)
+
+
+def efficientnet_b4(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b4', pretrained, progress, **kwargs)
+
+
+def efficientnet_b5(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b5', pretrained, progress, **kwargs)
+
+
+def efficientnet_b6(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b6', pretrained, progress, **kwargs)
+
+
+def efficientnet_b7(pretrained=False, progress=True, **kwargs):
+    return _efficientnet('efficientnet-b7', pretrained, progress, **kwargs)
