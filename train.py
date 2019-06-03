@@ -36,6 +36,7 @@ def load_config():
         config.dataset.root = args.root
 
     if args.world_size > 1:
+        config.distributed = Config()
         config.distributed.backend = args.backend
         config.distributed.init_method = args.init_method
         config.distributed.rank = args.rank
