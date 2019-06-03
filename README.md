@@ -2,23 +2,24 @@
 
 https://arxiv.org/abs/1905.11946
 
+## Prerequisites
+
+- Ubuntu or macOS
+- Python 3
+  - torch 1.1.0
+  - torchvision 0.3.0
+
 ## Usage
 
-### Train on MNIST dataset
+### Train
 
 ```shell
-$ python train.py -c configs/mnist.yaml
-```
-
-### Train on CIFAR10 dataset
-
-```shell
-$ python train.py -c configs/cifar10.yaml
+$ python train.py -c /path/to/config -r /path/to/dataset
 ```
 
 ## TO-DO
 
-- [ ] Support ImageNet dataset
+- [x] Support ImageNet dataset
 - [ ] Pre-trained weights
 
 ## References
