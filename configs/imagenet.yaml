@@ -1,0 +1,26 @@
+use_cuda: true
+data_parallel: true
+num_epochs: 90
+output_dir: experiments/imagenet
+
+model:
+  name: efficientnet_b0
+  num_classes: 1000
+  in_channels: 3
+
+dataset:
+  name: imagenet_dataloaders
+  root: data
+  batch_size: 256
+  image_size: 224
+  num_workers: 0
+
+optimizer:
+  name: SGD
+  lr: 1.e-1
+  weight_decay: 1.e-4
+
+scheduler:
+  name: StepLR
+  step_size: 30
+  gamma: 0.1
