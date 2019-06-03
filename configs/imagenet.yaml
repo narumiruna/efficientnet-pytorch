@@ -11,8 +11,8 @@ model:
 dataset:
   name: imagenet_dataloaders
   root: data
-  batch_size: 128
-  image_size: 64
+  batch_size: 256
+  image_size: 224
   num_workers: 0
 
 optimizer:
