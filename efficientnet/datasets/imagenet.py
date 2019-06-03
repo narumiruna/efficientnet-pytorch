@@ -22,9 +22,16 @@ class ImageNetDataLoader(data.DataLoader):
                 normalize,
             ])
 
+
+
         split = 'train' if train else 'val'
         dataset = datasets.ImageNet(root, split, download=download, transform=transform)
-        super(ImageNetDataLoader, self).__init__(dataset, batch_size=batch_size, shuffle=True, **kwargs)
+
+        sampler = None
+        if train:
+            sampler = data.distributed.DistributedSampler(dataset)
+
+        super(ImageNetDataLoader, self).__init__(dataset, batch_size=batch_size, shuffle=(sampler is None), sampler=sampler, **kwargs)
 
 
 def imagenet_dataloaders(root: str, image_size: int, batch_size: int, download: bool = True, **kwargs):
