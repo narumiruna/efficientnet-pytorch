@@ -4,7 +4,7 @@ https://arxiv.org/abs/1905.11946
 
 ## Prerequisites
 
-- Ubuntu or macOS
+- Ubuntu
 - Python 3
   - torch 1.1.0
   - torchvision 0.3.0
