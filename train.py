@@ -45,7 +45,7 @@ def main():
     print(config)
 
     if args.distributed:
-        init_process(args.backend, args.init_method, args.rank, args.world_size)
+        init_process(**config.distributed)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
 
