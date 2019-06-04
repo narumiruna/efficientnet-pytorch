@@ -14,10 +14,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
+
+    parser.add_argument('--distributed', action='store_true')
     parser.add_argument('--backend', type=str, default='gloo', help='Name of the backend to use.')
     parser.add_argument('--init-method', type=str, default='tcp://127.0.0.1:23456', help='URL specifying how to initialize the package.')
     parser.add_argument('--rank', type=int, default=0, help='Rank of the current process.')
     parser.add_argument('--world-size', type=int, default=1, help='Number of processes participating in the job.')
+
     return parser.parse_args()
 
 def init_process(backend, init_method, rank, world_size):
@@ -28,33 +31,25 @@ def init_process(backend, init_method, rank, world_size):
         world_size=world_size)
 
 
-def load_config():
-    args = parse_args()
+def load_config(args):
     config = Config.from_yaml(args.config)
 
     if args.root:
         config.dataset.root = args.root
 
-    if args.world_size > 1:
-        config.distributed = Config()
-        config.distributed.backend = args.backend
-        config.distributed.init_method = args.init_method
-        config.distributed.rank = args.rank
-        config.distributed.world_size = args.world_size
-
     return config
 
 def main():
-    config = load_config()
+    args = parse_args()
+    config = load_config(args)
     print(config)
 
-    if config.distributed.world_size > 1:
-        init_process(**config.distributed)
+    if args.distributed:
+        init_process(args.backend, args.init_method, args.rank, args.world_size)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
 
     model = ModelFactory.create(**config.model)
-
     if distributed.is_initialized():
         model = nn.parallel.DistributedDataParallel(model)
     else:
