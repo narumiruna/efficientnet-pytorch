@@ -17,8 +17,9 @@ dataset:
 
 optimizer:
   name: SGD
-  lr: 1.e-2
+  lr: 1.e-1
   weight_decay: 1.e-4
+  momentum: 0.9
   nesterov: true
 
 scheduler:
