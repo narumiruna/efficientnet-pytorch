@@ -11,13 +11,13 @@ model:
 dataset:
   name: cifar10_dataloaders
   root: data
-  batch_size: 128
-  image_size: 224
+  batch_size: 256
+  image_size: 32
   num_workers: 8
 
 optimizer:
   name: SGD
-  lr: 5.e-2
+  lr: 1.e-1
   weight_decay: 1.e-4
   momentum: 0.9
   nesterov: true
