@@ -1,6 +1,6 @@
 use_cuda: true
 data_parallel: true
-num_epochs: 1000
+num_epochs: 450
 output_dir: experiments/cifar10
 
 model:
@@ -11,18 +11,17 @@ model:
 dataset:
   name: cifar10_dataloaders
   root: data
-  batch_size: 256
+  batch_size: 128
   image_size: 224
   num_workers: 8
 
 optimizer:
   name: SGD
-  lr: 1.e-1
+  lr: 5.e-2
   weight_decay: 1.e-4
   momentum: 0.9
   nesterov: true
 
 scheduler:
-  name: CosineAnnealingLR
-  T_max: 1000
-  eta_min: 1.e-5
+  name: StepLR
+  step_size: 150
