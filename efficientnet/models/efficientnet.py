@@ -165,6 +165,22 @@ class EfficientNet(nn.Module):
             nn.Linear(last_channels, num_classes),
         )
 
+        # weight initialization
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.ones_(m.weight)
+                nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.Linear):
+                fan_out = m.weight.size(0)
+                init_range = 1.0 / math.sqrt(fan_out)
+                nn.init.uniform_(m.weight, -init_range, init_range)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
     def forward(self, x):
         x = self.features(x)
         x = x.mean([2, 3])
