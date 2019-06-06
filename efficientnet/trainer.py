@@ -35,6 +35,7 @@ class Trainer(AbstractTrainer):
         self.output_dir = output_dir
         self.device = device
 
+        self.epoch = 1
         self.start_epoch = 1
         self.best_acc = 0
 
@@ -46,7 +47,7 @@ class Trainer(AbstractTrainer):
         if os.path.exists(self.checkpoint_path):
             self.restore_checkpoint()
 
-        for epoch in range(self.start_epoch, self.num_epochs + 1):
+        for self.epoch in range(self.start_epoch, self.num_epochs + 1):
             self.scheduler.step()
 
             train_loss, train_acc = self.train()
@@ -54,9 +55,9 @@ class Trainer(AbstractTrainer):
 
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(epoch)
+                self.save_checkpoint(self.epoch)
 
-            print(f'Epoch: {epoch}/{self.num_epochs}, '
+            print(f'Epoch: {self.epoch}/{self.num_epochs}, '
                   f'train loss: {train_loss}, train acc: {train_acc}, '
                   f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
                   f'best valid acc: {self.best_acc * 100:.2f}')
@@ -67,7 +68,7 @@ class Trainer(AbstractTrainer):
         train_loss = Average()
         train_acc = Accuracy()
 
-        for x, y in self.train_loader:
+        for i, (x, y) in enumerate(self.train_loader):
             x = x.to(self.device)
             y = y.to(self.device)
 
@@ -82,6 +83,11 @@ class Trainer(AbstractTrainer):
 
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(pred, y)
+
+            if (i + 1) % 10 == 0:
+                print(f'Epoch: {self.epoch}/{self.num_epochs}, '
+                      f'iter: {i + 1}, '
+                      f'train loss: {train_loss}, train acc: {train_acc}.')
 
         return train_loss, train_acc
 
