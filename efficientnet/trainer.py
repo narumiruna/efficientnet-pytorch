@@ -36,7 +36,6 @@ class Trainer(AbstractTrainer):
         self.output_dir = output_dir
         self.device = device
 
-        self.epoch = 1
         self.start_epoch = 1
         self.best_acc = 0
 
@@ -48,8 +47,8 @@ class Trainer(AbstractTrainer):
         if os.path.exists(self.checkpoint_path):
             self.restore_checkpoint()
 
-        epoch_range = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
-        for self.epoch in epoch_range:
+        epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+        for epoch in epochs:
             self.scheduler.step()
 
             train_loss, train_acc = self.train()
@@ -57,12 +56,12 @@ class Trainer(AbstractTrainer):
 
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(self.epoch)
+                self.save_checkpoint(epoch)
 
-            epoch_range.set_postfix_str(f'Epoch: {self.epoch}/{self.num_epochs}, '
-                                        f'train loss: {train_loss}, train acc: {train_acc}, '
-                                        f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
-                                        f'best valid acc: {self.best_acc * 100:.2f}')
+            epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
+                                   f'train loss: {train_loss}, train acc: {train_acc}, '
+                                   f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
+                                   f'best valid acc: {self.best_acc * 100:.2f}')
 
     def train(self):
         self.model.train()
