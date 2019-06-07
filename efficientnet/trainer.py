@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 import torch
 import torch.nn.functional as F
+from tqdm import tqdm, trange
 
 from .metrics import Accuracy, Average
 
@@ -46,7 +47,8 @@ class Trainer(AbstractTrainer):
         if os.path.exists(self.checkpoint_path):
             self.restore_checkpoint()
 
-        for epoch in range(self.start_epoch, self.num_epochs + 1):
+        epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+        for epoch in epochs:
             self.scheduler.step()
 
             train_loss, train_acc = self.train()
@@ -56,10 +58,10 @@ class Trainer(AbstractTrainer):
                 self.best_acc = valid_acc.accuracy
                 self.save_checkpoint(epoch)
 
-            print(f'Epoch: {epoch}/{self.num_epochs}, '
-                  f'train loss: {train_loss}, train acc: {train_acc}, '
-                  f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
-                  f'best valid acc: {self.best_acc * 100:.2f}')
+            epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
+                                   f'train loss: {train_loss}, train acc: {train_acc}, '
+                                   f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
+                                   f'best valid acc: {self.best_acc * 100:.2f}')
 
     def train(self):
         self.model.train()
@@ -67,7 +69,8 @@ class Trainer(AbstractTrainer):
         train_loss = Average()
         train_acc = Accuracy()
 
-        for x, y in self.train_loader:
+        train_loader = tqdm(self.train_loader, ncols=0, desc='Train')
+        for x, y in train_loader:
             x = x.to(self.device)
             y = y.to(self.device)
 
@@ -83,6 +86,8 @@ class Trainer(AbstractTrainer):
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(pred, y)
 
+            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}.')
+
         return train_loss, train_acc
 
     def evaluate(self):
@@ -92,7 +97,8 @@ class Trainer(AbstractTrainer):
         valid_acc = Accuracy()
 
         with torch.no_grad():
-            for x, y in self.valid_loader:
+            valid_loader = tqdm(self.valid_loader, desc='Validate', ncols=0)
+            for x, y in valid_loader:
                 x = x.to(self.device)
                 y = y.to(self.device)
 
@@ -103,6 +109,8 @@ class Trainer(AbstractTrainer):
 
                 valid_loss.update(loss.item(), number=x.size(0))
                 valid_acc.update(pred, y)
+
+                valid_loader.set_postfix_str(f'valid loss: {valid_loss}, valid acc: {valid_acc}.')
 
         return valid_loss, valid_acc
 

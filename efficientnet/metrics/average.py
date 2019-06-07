@@ -19,4 +19,4 @@ class Average(object):
             return self.sum / self.count
 
     def __str__(self):
-        return '{:.6f}'.format(self.average)
+        return '{:.4f}'.format(self.average)

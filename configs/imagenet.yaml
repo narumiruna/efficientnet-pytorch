@@ -13,14 +13,16 @@ dataset:
   root: data
   batch_size: 256
   image_size: 224
-  num_workers: 0
+  num_workers: 16
 
 optimizer:
-  name: SGD
-  lr: 1.e-1
-  weight_decay: 1.e-4
+  name: RMSprop
+  lr: 0.256
+  alpha: 0.9
+  weight_decay: 1.e-5
+  eps: 1.e-3
+  momentum: 0.9
 
 scheduler:
-  name: StepLR
-  step_size: 30
-  gamma: 0.1
+  name: ExponentialLR
+  gamma: 0.98738885893  # lr *= 0.97, 2.4 epochs
