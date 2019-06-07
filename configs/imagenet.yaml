@@ -25,6 +25,4 @@ optimizer:
 
 scheduler:
   name: ExponentialLR
-  # lr *= 0.97, 2.4 epochs
-  gamma: 0.98738885893 
-
+  gamma: 0.98738885893  # lr *= 0.97, 2.4 epochs
