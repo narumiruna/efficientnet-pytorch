@@ -16,15 +16,18 @@ def parse_args():
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
     return parser.parse_args()
 
+
 def init_process(backend, init_method, rank, world_size):
     distributed.init_process_group(
         backend=backend,
         init_method=init_method,
         rank=rank,
-        world_size=world_size)
+        world_size=world_size,
+    )
 
 
-def load_config(args):
+def load_config():
+    args = parse_args()
     config = Config.from_yaml(args.config)
 
     if args.root:
@@ -32,11 +35,11 @@ def load_config(args):
 
     return config
 
+
 def main():
     torch.backends.cudnn.benchmark = True
 
-    args = parse_args()
-    config = load_config(args)
+    config = load_config()
     print(config)
 
     if 'distributed' in config:
