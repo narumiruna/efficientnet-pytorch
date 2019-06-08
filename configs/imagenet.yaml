@@ -18,8 +18,9 @@ dataset:
 optimizer:
   name: SGD
   lr: 0.05
-  weight_decay: 1.e-5
+  weight_decay: 1.e-4
   momentum: 0.9
+  nesterov: true
 
 scheduler:
   name: MultiStepLR
