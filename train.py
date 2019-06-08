@@ -49,11 +49,12 @@ def main():
 
     model = ModelFactory.create(**config.model)
     if distributed.is_initialized():
+        model.to(device)
         model = nn.parallel.DistributedDataParallel(model)
     else:
         if config.data_parallel:
             model = nn.DataParallel(model)
-    model.to(device)
+        model.to(device)
 
     optimizer = OptimFactory.create(model.parameters(), **config.optimizer)
     scheduler = SchedulerFactory.create(optimizer, **config.scheduler)
