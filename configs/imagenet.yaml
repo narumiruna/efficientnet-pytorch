@@ -11,18 +11,18 @@ model:
 dataset:
   name: imagenet_dataloaders
   root: data
-  batch_size: 256
+  batch_size: 128
   image_size: 224
   num_workers: 16
 
 optimizer:
-  name: RMSprop
-  lr: 0.256
-  alpha: 0.9
+  name: SGD
+  lr: 0.05
   weight_decay: 1.e-5
-  eps: 1.e-3
   momentum: 0.9
 
 scheduler:
-  name: ExponentialLR
-  gamma: 0.98738885893  # lr *= 0.97, 2.4 epochs
+  name: MultiStepLR
+  milestones: [30, 60, 80]
+  gamma: 0.1
+  
