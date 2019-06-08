@@ -14,13 +14,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
-
-    parser.add_argument('--distributed', action='store_true')
-    parser.add_argument('--backend', type=str, default='gloo', help='Name of the backend to use.')
-    parser.add_argument('--init-method', type=str, default='tcp://127.0.0.1:23456', help='URL specifying how to initialize the package.')
-    parser.add_argument('--rank', type=int, default=0, help='Rank of the current process.')
-    parser.add_argument('--world-size', type=int, default=1, help='Number of processes participating in the job.')
-
     return parser.parse_args()
 
 def init_process(backend, init_method, rank, world_size):
@@ -44,7 +37,7 @@ def main():
     config = load_config(args)
     print(config)
 
-    if args.distributed:
+    if 'distributed' in config:
         init_process(**config.distributed)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
