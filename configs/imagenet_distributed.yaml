@@ -17,7 +17,7 @@ dataset:
 
 optimizer:
   name: SGD
-  lr: 0.05
+  lr: 0.1
   weight_decay: 1.e-4
   momentum: 0.9
   nesterov: true
@@ -26,3 +26,9 @@ scheduler:
   name: MultiStepLR
   milestones: [30, 60, 80]
   gamma: 0.1
+
+distributed:
+  backend: nccl
+  init_method: tcp://127.0.0.1:23456
+  rank: 0
+  world_size: 2
