@@ -25,13 +25,9 @@ scheduler:
   name: MultiStepLR
   milestones: [30, 60, 80]
   gamma: 0.1
-<<<<<<< HEAD
-  
-=======
 
 distributed:
   backend: gloo
   init_method: tcp://127.0.0.1:23456
   rank: 0
   world_size: 2
->>>>>>> Update config
