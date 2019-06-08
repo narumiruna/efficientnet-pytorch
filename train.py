@@ -33,6 +33,8 @@ def load_config(args):
     return config
 
 def main():
+    torch.backends.cudnn.benchmark = True
+
     args = parse_args()
     config = load_config(args)
     print(config)
