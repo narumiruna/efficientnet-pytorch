@@ -25,27 +25,21 @@ class AbstractTrainer(metaclass=ABCMeta):
 
 class Trainer(AbstractTrainer):
 
-    def __init__(self, model, optimizer, train_loader, valid_loader, scheduler, device, num_epochs: int,
-                 output_dir: str):
+    def __init__(self, config, model, optimizer, train_loader, valid_loader, scheduler, device):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_loader = train_loader
         self.valid_loader = valid_loader
-        self.num_epochs = num_epochs
-        self.output_dir = output_dir
         self.device = device
+        self.num_epochs = config.num_epochs
+        self.output_dir = config.output_dir
 
         self.start_epoch = 1
         self.best_acc = 0
 
-        self.checkpoint_path = os.path.join(self.output_dir, 'checkpoint.pth')
-
     def fit(self):
         os.makedirs(self.output_dir, exist_ok=True)
-
-        if os.path.exists(self.checkpoint_path):
-            self.restore_checkpoint()
 
         epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
@@ -56,7 +50,8 @@ class Trainer(AbstractTrainer):
 
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(epoch)
+                f = os.path.join(self.output_dir, 'checkpoint.pth')
+                self.save_checkpoint(epoch, f)
 
             epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
@@ -114,7 +109,7 @@ class Trainer(AbstractTrainer):
 
         return valid_loss, valid_acc
 
-    def save_checkpoint(self, epoch):
+    def save_checkpoint(self, epoch, f):
         self.model.eval()
 
         checkpoint = {
@@ -125,10 +120,14 @@ class Trainer(AbstractTrainer):
             'best_acc': self.best_acc
         }
 
-        torch.save(checkpoint, self.checkpoint_path)
+        dirname = os.path.dirname(f)
+        if dirname:
+            os.makedirs(dirname, exist_ok=True)
 
-    def restore_checkpoint(self):
-        checkpoint = torch.load(self.checkpoint_path, map_location='cpu')
+        torch.save(checkpoint, f)
+
+    def resume(self, f):
+        checkpoint = torch.load(f, map_location='cpu')
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])

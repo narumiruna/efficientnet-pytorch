@@ -3,7 +3,7 @@ from .utils import AttrDict, load_yaml
 
 class Config(AttrDict):
 
-    distributed = None
+    distributed = AttrDict()
 
     @classmethod
     def from_yaml(cls, f):
