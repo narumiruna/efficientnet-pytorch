@@ -42,14 +42,13 @@ def main():
     config = load_config()
     print(config)
 
-    use_distributed = 'distributed' in config
-    if use_distributed:
+    if config.distributed:
         init_process(**config.distributed)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
 
     model = ModelFactory.create(**config.model)
-    if use_distributed:
+    if config.distributed:
         model.to(device)
         model = nn.parallel.DistributedDataParallel(model)
     else:
@@ -60,7 +59,7 @@ def main():
     optimizer = OptimFactory.create(model.parameters(), **config.optimizer)
     scheduler = SchedulerFactory.create(optimizer, **config.scheduler)
 
-    train_loader, valid_loader = DatasetFactory.create(use_distributed, **config.dataset)
+    train_loader, valid_loader = DatasetFactory.create(**config.dataset)
 
     trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.num_epochs,
                       config.output_dir)
