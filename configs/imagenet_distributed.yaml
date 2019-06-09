@@ -14,7 +14,6 @@ dataset:
   batch_size: 128
   image_size: 224
   num_workers: 16
-  distributed_sampler: true
 
 optimizer:
   name: SGD
