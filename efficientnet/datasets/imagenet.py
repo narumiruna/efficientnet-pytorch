@@ -4,7 +4,7 @@ from torchvision import datasets, transforms
 
 class ImageNetDataLoader(data.DataLoader):
 
-    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, download: bool = True, use_distributed=False, **kwargs):
+    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, download: bool = True, distributed_sampler=False, **kwargs):
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
         if train:
@@ -26,7 +26,7 @@ class ImageNetDataLoader(data.DataLoader):
         dataset = datasets.ImageNet(root, split, download=download, transform=transform)
 
         sampler = None
-        if train and use_distributed:
+        if train and distributed_sampler:
             sampler = data.distributed.DistributedSampler(dataset)
 
         super(ImageNetDataLoader, self).__init__(
