@@ -5,7 +5,7 @@ class AttrDict(dict):
         super(AttrDict, self).__init__(*args, **kwargs)
         for key, value in self.items():
             if isinstance(value, dict):
-                self[key] = AttrDict(value)
+                self.__dict__[key] = AttrDict(value)
 
         self.__dict__[AttrDict.IMMUTABLE] = False
 
