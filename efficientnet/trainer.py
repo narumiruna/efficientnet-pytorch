@@ -135,3 +135,7 @@ class Trainer(AbstractTrainer):
 
         self.start_epoch = checkpoint['epoch'] + 1
         self.best_acc = checkpoint['best_acc']
+
+    def load_weight(self, f):
+        state_dict = torch.load(f, map_location='cpu')
+        self.model.load_state_dict(state_dict)

@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
     parser.add_argument('--resume', type=str, default=None)
+    parser.add_argument('--weight', type=str, default=None)
     return parser.parse_args()
 
 
@@ -68,6 +69,9 @@ def main():
 
     if config.resume is not None:
         trainer.resume(config.resume)
+
+    if config.weight is not None:
+        trainer.load_weight(config.weight)
 
     trainer.fit()
 
