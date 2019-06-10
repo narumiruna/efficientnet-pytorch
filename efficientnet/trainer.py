@@ -8,7 +8,6 @@ from torch import nn, optim
 from torch.utils import data
 from tqdm import tqdm, trange
 
-from .config import Config
 from .metrics import Accuracy, Average
 
 
