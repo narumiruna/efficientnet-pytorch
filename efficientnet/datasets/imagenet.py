@@ -28,7 +28,7 @@ class ImageNetDataLoader(data.DataLoader):
         dataset = datasets.ImageNet(root, split, download=download, transform=transform)
 
         sampler = None
-        if train and distributed_is_initialized:
+        if train and distributed_is_initialized():
             sampler = data.distributed.DistributedSampler(dataset)
 
         super(ImageNetDataLoader, self).__init__(
