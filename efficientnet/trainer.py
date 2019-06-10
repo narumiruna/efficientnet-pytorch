@@ -3,8 +3,11 @@ from abc import ABCMeta, abstractmethod
 
 import torch
 import torch.nn.functional as F
+from torch import nn, optim
+from torch.utils import data
 from tqdm import tqdm, trange
 
+from .config import Config
 from .metrics import Accuracy, Average
 
 
@@ -25,7 +28,16 @@ class AbstractTrainer(metaclass=ABCMeta):
 
 class Trainer(AbstractTrainer):
 
-    def __init__(self, config, model, optimizer, train_loader, valid_loader, scheduler, device):
+    def __init__(
+            self,
+            config: Config,
+            model: nn.Module,
+            optimizer: optim.Optimizer,
+            train_loader: data.DataLoader,
+            valid_loader: data.DataLoader,
+            scheduler: optim.lr_scheduler._LRScheduler,
+            device: torch.device,
+    ):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -39,8 +51,6 @@ class Trainer(AbstractTrainer):
         self.best_acc = 0
 
     def fit(self):
-        os.makedirs(self.output_dir, exist_ok=True)
-
         epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
@@ -50,8 +60,12 @@ class Trainer(AbstractTrainer):
 
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                f = os.path.join(self.output_dir, 'checkpoint.pth')
-                self.save_checkpoint(epoch, f)
+
+                f = os.path.join(self.output_dir, 'best.pth')
+                self.save_weight(f)
+
+            f = os.path.join(self.output_dir, 'checkpoint.pth')
+            self.save_checkpoint(epoch, f)
 
             epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
@@ -139,3 +153,7 @@ class Trainer(AbstractTrainer):
     def load_weight(self, f):
         state_dict = torch.load(f, map_location='cpu')
         self.model.load_state_dict(state_dict)
+
+    def save_weight(self, f):
+        state_dict = self.model.state_dict()
+        torch.save(state_dict, f)
