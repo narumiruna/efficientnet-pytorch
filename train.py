@@ -14,6 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
+    parser.add_argument('--resume', type=str, default=None)
     return parser.parse_args()
 
 
@@ -32,6 +33,8 @@ def load_config():
 
     if args.root:
         config.dataset.root = args.root
+
+    config.update(vars(args))
 
     return config
 
@@ -61,9 +64,12 @@ def main():
 
     train_loader, valid_loader = DatasetFactory.create(**config.dataset)
 
-    trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.num_epochs,
-                      config.output_dir)
-    trainer.fit()
+    trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.output_dir)
+
+    if config.resume is not None:
+        trainer.resume(config.resume)
+
+    trainer.fit(config.num_epochs)
 
 
 if __name__ == "__main__":

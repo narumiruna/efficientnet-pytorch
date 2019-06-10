@@ -1,10 +1,14 @@
 import os
+import shutil
 from abc import ABCMeta, abstractmethod
 
 import torch
 import torch.nn.functional as F
+from torch import nn, optim
+from torch.utils import data
 from tqdm import tqdm, trange
 
+from .config import Config
 from .metrics import Accuracy, Average
 
 
@@ -25,40 +29,45 @@ class AbstractTrainer(metaclass=ABCMeta):
 
 class Trainer(AbstractTrainer):
 
-    def __init__(self, model, optimizer, train_loader, valid_loader, scheduler, device, num_epochs: int,
-                 output_dir: str):
+    def __init__(
+            self,
+            model: nn.Module,
+            optimizer: optim.Optimizer,
+            train_loader: data.DataLoader,
+            valid_loader: data.DataLoader,
+            scheduler: optim.lr_scheduler._LRScheduler,
+            device: torch.device,
+            output_dir: str,
+    ):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_loader = train_loader
         self.valid_loader = valid_loader
-        self.num_epochs = num_epochs
-        self.output_dir = output_dir
         self.device = device
+        self.output_dir = output_dir
 
         self.start_epoch = 1
         self.best_acc = 0
 
-        self.checkpoint_path = os.path.join(self.output_dir, 'checkpoint.pth')
-
-    def fit(self):
-        os.makedirs(self.output_dir, exist_ok=True)
-
-        if os.path.exists(self.checkpoint_path):
-            self.restore_checkpoint()
-
-        epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+    def fit(self, num_epochs):
+        epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
 
             train_loss, train_acc = self.train()
             valid_loss, valid_acc = self.evaluate()
 
+            last_checkpoint = os.path.join(self.output_dir, 'checkpoint.pth')
+            best_checkpoint = os.path.join(self.output_dir, 'best.pth')
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(epoch)
+                self.save_checkpoint(epoch, last_checkpoint)
+                shutil.copy(last_checkpoint, best_checkpoint)
+            else:
+                self.save_checkpoint(epoch, last_checkpoint)
 
-            epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
+            epochs.set_postfix_str(f'Epoch: {epoch}/{num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
                                    f'best valid acc: {self.best_acc * 100:.2f}')
@@ -114,7 +123,7 @@ class Trainer(AbstractTrainer):
 
         return valid_loss, valid_acc
 
-    def save_checkpoint(self, epoch):
+    def save_checkpoint(self, epoch, f):
         self.model.eval()
 
         checkpoint = {
@@ -125,10 +134,14 @@ class Trainer(AbstractTrainer):
             'best_acc': self.best_acc
         }
 
-        torch.save(checkpoint, self.checkpoint_path)
+        dirname = os.path.dirname(f)
+        if dirname:
+            os.makedirs(dirname, exist_ok=True)
 
-    def restore_checkpoint(self):
-        checkpoint = torch.load(self.checkpoint_path, map_location='cpu')
+        torch.save(checkpoint, f)
+
+    def resume(self, f):
+        checkpoint = torch.load(f, map_location='cpu')
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
