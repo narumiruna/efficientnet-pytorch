@@ -1,4 +1,5 @@
 import os
+import shutil
 from abc import ABCMeta, abstractmethod
 
 import torch
@@ -58,14 +59,14 @@ class Trainer(AbstractTrainer):
             train_loss, train_acc = self.train()
             valid_loss, valid_acc = self.evaluate()
 
+            last_checkpoint = os.path.join(self.output_dir, 'checkpoint.pth')
+            best_checkpoint = os.path.join(self.output_dir, 'best.pth')
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-
-                f = os.path.join(self.output_dir, 'best.pth')
-                self.save_weight(f)
-
-            f = os.path.join(self.output_dir, 'checkpoint.pth')
-            self.save_checkpoint(epoch, f)
+                self.save_checkpoint(epoch, last_checkpoint)
+                shutil.copy(last_checkpoint, best_checkpoint)
+            else:
+                self.save_checkpoint(epoch, last_checkpoint)
 
             epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
@@ -149,11 +150,3 @@ class Trainer(AbstractTrainer):
 
         self.start_epoch = checkpoint['epoch'] + 1
         self.best_acc = checkpoint['best_acc']
-
-    def load_weight(self, f):
-        state_dict = torch.load(f, map_location='cpu')
-        self.model.load_state_dict(state_dict)
-
-    def save_weight(self, f):
-        state_dict = self.model.state_dict()
-        torch.save(state_dict, f)
