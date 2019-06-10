@@ -31,13 +31,13 @@ class Trainer(AbstractTrainer):
 
     def __init__(
             self,
-            config: Config,
             model: nn.Module,
             optimizer: optim.Optimizer,
             train_loader: data.DataLoader,
             valid_loader: data.DataLoader,
             scheduler: optim.lr_scheduler._LRScheduler,
             device: torch.device,
+            output_dir: str,
     ):
         self.model = model
         self.optimizer = optimizer
@@ -45,14 +45,13 @@ class Trainer(AbstractTrainer):
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.device = device
-        self.num_epochs = config.num_epochs
-        self.output_dir = config.output_dir
+        self.output_dir = output_dir
 
         self.start_epoch = 1
         self.best_acc = 0
 
-    def fit(self):
-        epochs = trange(self.start_epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+    def fit(self, num_epochs):
+        epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
 
@@ -68,7 +67,7 @@ class Trainer(AbstractTrainer):
             else:
                 self.save_checkpoint(epoch, last_checkpoint)
 
-            epochs.set_postfix_str(f'Epoch: {epoch}/{self.num_epochs}, '
+            epochs.set_postfix_str(f'Epoch: {epoch}/{num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
                                    f'best valid acc: {self.best_acc * 100:.2f}')

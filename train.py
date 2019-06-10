@@ -64,12 +64,12 @@ def main():
 
     train_loader, valid_loader = DatasetFactory.create(**config.dataset)
 
-    trainer = Trainer(config, model, optimizer, train_loader, valid_loader, scheduler, device)
+    trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.output_dir)
 
     if config.resume is not None:
         trainer.resume(config.resume)
 
-    trainer.fit()
+    trainer.fit(config.num_epochs)
 
 
 if __name__ == "__main__":
