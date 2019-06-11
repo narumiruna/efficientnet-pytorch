@@ -1,3 +1,5 @@
+import warnings
+
 from torch.utils import data
 from torchvision import datasets, transforms
 
@@ -8,6 +10,8 @@ class ImageNetDataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, download: bool = True, **kwargs):
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        
+        warnings.filterwarnings('ignore', category=UserWarning)
 
         if train:
             transform = transforms.Compose([
