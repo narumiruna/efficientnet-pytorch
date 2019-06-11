@@ -69,7 +69,7 @@ class Trainer(AbstractTrainer):
             epochs.set_postfix_str(f'Epoch: {epoch}/{num_epochs}, '
                                    f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
-                                   f'best valid acc: {self.best_acc * 100:.2f}')
+                                   f'best valid acc: {self.best_acc:.2f}')
 
     def train(self):
         self.model.train()
@@ -89,10 +89,8 @@ class Trainer(AbstractTrainer):
             loss.backward()
             self.optimizer.step()
 
-            pred = output.argmax(dim=1)
-
             train_loss.update(loss.item(), number=x.size(0))
-            train_acc.update(pred, y)
+            train_acc.update(output, y)
 
             train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}.')
 
@@ -113,10 +111,8 @@ class Trainer(AbstractTrainer):
                 output = self.model(x)
                 loss = F.cross_entropy(output, y)
 
-                pred = output.argmax(dim=1)
-
                 valid_loss.update(loss.item(), number=x.size(0))
-                valid_acc.update(pred, y)
+                valid_acc.update(output, y)
 
                 valid_loader.set_postfix_str(f'valid loss: {valid_loss}, valid acc: {valid_acc}.')
 
