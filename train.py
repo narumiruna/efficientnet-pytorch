@@ -8,6 +8,7 @@ from efficientnet.datasets import DatasetFactory
 from efficientnet.models import ModelFactory
 from efficientnet.optim import OptimFactory, SchedulerFactory
 from efficientnet.trainer import Trainer
+from efficientnet.utils import distributed_is_initialized
 
 
 def parse_args():
@@ -51,7 +52,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
 
     model = ModelFactory.create(**config.model)
-    if config.distributed:
+    if distributed_is_initialized():
         model.to(device)
         model = nn.parallel.DistributedDataParallel(model)
     else:
