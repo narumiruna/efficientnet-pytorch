@@ -66,8 +66,7 @@ class Trainer(AbstractTrainer):
             else:
                 self.save_checkpoint(epoch, last_checkpoint)
 
-            epochs.set_postfix_str(f'Epoch: {epoch}/{num_epochs}, '
-                                   f'train loss: {train_loss}, train acc: {train_acc}, '
+            epochs.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
                                    f'best valid acc: {self.best_acc:.2f}')
 
