@@ -16,15 +16,22 @@ def parse_args():
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
     parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
     parser.add_argument('--resume', type=str, default=None)
+
+    # distributed
+    parser.add_argument('--backend', type=str, default='nccl')
+    parser.add_argument('--init-method', type=str, default='tcp://127.0.0.1:23456')
+    parser.add_argument('--world-size', type=int, default=1)
+    parser.add_argument('--rank', type=int, default=0)
+
     return parser.parse_args()
 
 
-def init_process(backend, init_method, rank, world_size):
+def init_process(backend, init_method, world_size, rank):
     distributed.init_process_group(
         backend=backend,
         init_method=init_method,
-        rank=rank,
         world_size=world_size,
+        rank=rank,
     )
 
 
@@ -46,8 +53,8 @@ def main():
     config = load_config()
     print(config)
 
-    if 'distributed' in config:
-        init_process(**config.distributed)
+    if config.world_size > 1:
+        init_process(config.backend, config.init_method, config.world_size, config.rank)
 
     device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
 
