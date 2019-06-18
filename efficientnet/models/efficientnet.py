@@ -21,10 +21,9 @@ class Swish(nn.Module):
 
     def __init__(self, *args, **kwargs):
         super(Swish, self).__init__()
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        return x * self.sigmoid(x)
+        return x * torch.sigmoid(x)
 
 
 class ConvBNReLU(nn.Sequential):
