@@ -9,6 +9,7 @@ from torch.utils import data
 from tqdm import tqdm, trange
 
 from .metrics import Accuracy, Average
+from .warmup import GradualWarmup
 
 
 class AbstractTrainer(metaclass=ABCMeta):
@@ -50,6 +51,7 @@ class Trainer(AbstractTrainer):
         self.best_acc = 0
 
     def fit(self, num_epochs):
+        self.warmup = GradualWarmup(self.optimizer, total_iterations=400)
         epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
@@ -78,6 +80,8 @@ class Trainer(AbstractTrainer):
 
         train_loader = tqdm(self.train_loader, ncols=0, desc='Train')
         for x, y in train_loader:
+            self.warmup.step()
+
             x = x.to(self.device)
             y = y.to(self.device)
 
@@ -91,7 +95,7 @@ class Trainer(AbstractTrainer):
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(output, y)
 
-            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}.')
+            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, lr: {self.lr}.')
 
         return train_loss, train_acc
 
@@ -143,3 +147,7 @@ class Trainer(AbstractTrainer):
 
         self.start_epoch = checkpoint['epoch'] + 1
         self.best_acc = checkpoint['best_acc']
+
+    @property
+    def lr(self):
+        return self.optimizer.param_groups[0]['lr']
