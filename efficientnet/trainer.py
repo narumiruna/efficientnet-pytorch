@@ -95,7 +95,7 @@ class Trainer(AbstractTrainer):
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(output, y)
 
-            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, lr: {self.lr}.')
+            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}.')
 
         return train_loss, train_acc
 
@@ -147,7 +147,3 @@ class Trainer(AbstractTrainer):
 
         self.start_epoch = checkpoint['epoch'] + 1
         self.best_acc = checkpoint['best_acc']
-
-    @property
-    def lr(self):
-        return self.optimizer.param_groups[0]['lr']
