@@ -1,3 +1,4 @@
+import math
 import os
 import shutil
 from abc import ABCMeta, abstractmethod
@@ -50,8 +51,18 @@ class Trainer(AbstractTrainer):
         self.start_epoch = 1
         self.best_acc = 0
 
+    def get_warmup_iterations(self):
+        warmup_epochs = 5
+
+        num_samples = len(self.train_loader.dataset)
+        batch_size = self.train_loader.batch_size
+        num_training_iterations = math.ceil(num_samples / batch_size)
+
+        return num_training_iterations * warmup_epochs
+
     def fit(self, num_epochs):
-        self.warmup = GradualWarmup(self.optimizer, total_iterations=400)
+        self.warmup = GradualWarmup(self.optimizer, total_iterations=self.get_warmup_iterations())
+
         epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
