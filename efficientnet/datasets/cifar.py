@@ -5,20 +5,21 @@ from torchvision import datasets, transforms
 class CIFAR10DataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool, **kwargs):
+        normalize = transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2470, 0.2435, 0.2616))
+
         if train:
             transform = transforms.Compose([
-                transforms.Resize(image_size),
+                transforms.RandomResizedCrop(image_size),
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.RandomRotation(25),
                 transforms.ToTensor(),
-                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
+                normalize,
             ])
         else:
             transform = transforms.Compose([
-                transforms.Resize(image_size),
+                transforms.Resize(int(image_size * 256 / 224)),
+                transforms.CenterCrop(image_size),
                 transforms.ToTensor(),
-                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))
+                normalize,
             ])
 
         dataset = datasets.CIFAR10(root, train=train, transform=transform, download=True)
