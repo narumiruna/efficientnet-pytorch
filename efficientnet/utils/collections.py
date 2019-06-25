@@ -18,7 +18,7 @@ class AttrDict(dict):
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if self.__immutable__:
+        if self.__dict__[AttrDict.IMMUTABLE]:
             raise AttributeError('Attempted to set "{}" to "{}", but AttrDict is immutable'.format(key, value))
 
         if isinstance(value, dict):
