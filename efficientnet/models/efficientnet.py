@@ -6,7 +6,7 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet-b0': None,
+    'efficientnet-b0': 'https://raw.githubusercontent.com/narumiruna/models/master/efficientnet-pytorch/efficientnetb0-dae026c6.pth',
     'efficientnet-b1': None,
     'efficientnet-b2': None,
     'efficientnet-b3': None,
