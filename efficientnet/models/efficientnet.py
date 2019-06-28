@@ -6,7 +6,7 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet-b0': None,
+    'efficientnet-b0': 'https://raw.githubusercontent.com/narumiruna/models/master/efficientnet-pytorch/efficientnetb0-dae026c6.pth',
     'efficientnet-b1': None,
     'efficientnet-b2': None,
     'efficientnet-b3': None,
@@ -29,12 +29,17 @@ class Swish(nn.Module):
 class ConvBNReLU(nn.Sequential):
 
     def __init__(self, in_planes, out_planes, kernel_size, stride=1, groups=1):
-        padding = (kernel_size - 1) // 2
+        padding = self._get_padding(kernel_size, stride)
         super(ConvBNReLU, self).__init__(
-            nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding, groups=groups, bias=False),
-            nn.BatchNorm2d(out_planes, eps=1e-3, momentum=0.01),
+            nn.ZeroPad2d(padding),
+            nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding=0, groups=groups, bias=False),
+            nn.BatchNorm2d(out_planes),
             Swish(),
         )
+
+    def _get_padding(self, kernel_size, stride):
+        p = max(kernel_size - stride, 0)
+        return [p // 2, p - p // 2, p // 2, p - p // 2]
 
 
 class SqueezeExcitation(nn.Module):
@@ -84,7 +89,7 @@ class MBConvBlock(nn.Module):
             SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
             nn.Conv2d(hidden_dim, out_planes, 1, bias=False),
-            nn.BatchNorm2d(out_planes, eps=1e-3, momentum=0.01),
+            nn.BatchNorm2d(out_planes),
         ]
 
         self.conv = nn.Sequential(*layers)
