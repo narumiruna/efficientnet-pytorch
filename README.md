@@ -17,6 +17,19 @@ https://arxiv.org/abs/1905.11946
 $ python train.py -c /path/to/config -r /path/to/dataset
 ```
 
+## Pretrained models
+
+| Model Name | Top-1 Accuracy |
+| ------ | ------ |
+| efficientnet-b0 | 75.74% |
+| efficientnet-b1 |  |
+| efficientnet-b2 |  |
+| efficientnet-b3 |  |
+| efficientnet-b4 |  |
+| efficientnet-b5 |  |
+| efficientnet-b6 |  |
+| efficientnet-b7 |  |
+
 ## TO-DO
 
 - [x] Support ImageNet dataset
