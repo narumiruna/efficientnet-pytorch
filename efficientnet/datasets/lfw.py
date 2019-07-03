@@ -4,9 +4,7 @@ import random
 
 import torch
 import torchvision.transforms.functional as F
-from PIL import Image
 from torch.utils import data
-from torch.utils.data.dataset import random_split
 from torchvision import transforms
 from torchvision.datasets.folder import pil_loader
 
@@ -88,11 +86,18 @@ class LFW(data.Dataset):
         return len(self.mask_paths)
 
 
-def lfw_dataloaders(root, batch_size, image_size, valid_ratio=0.1, workers=0):
+def lfw_dataloaders(root, batch_size, image_size=24, valid_ratio=0.1, workers=0):
 
-    transform = transforms.Compose([transforms.ToTensor()])
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.4332, 0.3757, 0.3340], std=[0.2983, 0.2732, 0.2665]),
+    ])
 
-    joint_transform = transforms.Compose([JointRandomFlip(), JointRandomRotate(), JointRandomResizeCrop(224)])
+    joint_transform = transforms.Compose([
+        JointRandomFlip(),
+        JointRandomRotate(),
+        JointRandomResizeCrop(image_size),
+    ])
 
     assert 0.0 <= valid_ratio < 1.0
 
@@ -105,7 +110,7 @@ def lfw_dataloaders(root, batch_size, image_size, valid_ratio=0.1, workers=0):
         size = len(dataset)
         val_size = int(size * valid_ratio)
 
-        train_dataset, val_dataset = random_split(dataset, [size - val_size, val_size])
+        train_dataset, val_dataset = data.random_split(dataset, [size - val_size, val_size])
 
         train_loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=workers)
 
