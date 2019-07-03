@@ -6,12 +6,12 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet-b0': 'https://raw.githubusercontent.com/narumiruna/models/master/efficientnet-pytorch/efficientnetb0-dae026c6.pth',
-    'efficientnet-b1': None,
-    'efficientnet-b2': None,
-    'efficientnet-b3': None,
-    'efficientnet-b4': None,
-    'efficientnet-b5': None,
+    'efficientnet-b0': 'https://www.dropbox.com/s/d05p6jl55a2zm8s/efficientnetb0-93624d.pth?dl=1',
+    'efficientnet-b1': 'https://www.dropbox.com/s/kxrdznk7s7g885f/efficientnetb1-12d34e.pth?dl=1',
+    'efficientnet-b2': 'https://www.dropbox.com/s/pzwztskhm2rwcae/efficientnetb2-f03b76.pth?dl=1',
+    'efficientnet-b3': 'https://www.dropbox.com/s/q3a2o1fq0sbqkr5/efficientnetb3-108f55.pth?dl=1',
+    'efficientnet-b4': 'https://www.dropbox.com/s/w1sxdltcu3f7ppj/efficientnetb4-5f4b22.pth?dl=1',
+    'efficientnet-b5': 'https://www.dropbox.com/s/kc5v3wsqjq6sunp/efficientnetb5-18781f.pth?dl=1',
     'efficientnet-b6': None,
     'efficientnet-b7': None,
 }
