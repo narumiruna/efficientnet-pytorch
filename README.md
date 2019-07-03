@@ -30,11 +30,6 @@ $ python train.py -c /path/to/config -r /path/to/dataset
 | efficientnet-b6 |  |
 | efficientnet-b7 |  |
 
-## TO-DO
-
-- [x] Support ImageNet dataset
-- [ ] Pre-trained weights
-
 ## References
 
 - https://arxiv.org/abs/1905.11946
