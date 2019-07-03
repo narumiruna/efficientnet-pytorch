@@ -1,6 +1,7 @@
 import os
 import warnings
 
+from PIL import Image
 from torch.utils import data
 from torchvision import datasets, transforms
 
@@ -23,7 +24,7 @@ class ImageNetDataLoader(data.DataLoader):
             ])
         else:
             transform = transforms.Compose([
-                transforms.Resize(int(image_size * 256 / 224)),
+                transforms.Resize(int(image_size * 256 / 224), interpolation=Image.BICUBIC),
                 transforms.CenterCrop(image_size),
                 transforms.ToTensor(),
                 normalize,
