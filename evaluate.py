@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument('-r', '--root', type=str, default='data')
     parser.add_argument('--batch-size', type=int, default=128)
     parser.add_argument('-w', '--weight', type=str, default=None)
+    parser.add_argument('--num-workers', type=int, default=8)
     return parser.parse_args()
 
 
@@ -45,7 +46,7 @@ def evaluate(model, valid_loader, device):
 if __name__ == '__main__':
     args = parse_args()
 
-    image_size = params[args.arch][2]
+
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -57,5 +58,7 @@ if __name__ == '__main__':
         model = ModelFactory.create(name=args.arch, pretrained=True)
     model.to(device)
 
-    valid_loader = ImageNetDataLoader(args.root, image_size, False, args.batch_size, num_workers=8)
+    image_size = params[args.arch][2]
+    valid_loader = ImageNetDataLoader(args.root, image_size, False, args.batch_size, num_workers=args.num_workers)
+
     evaluate(model, valid_loader, device)
