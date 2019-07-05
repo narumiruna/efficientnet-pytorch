@@ -6,14 +6,25 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet-b0': 'https://www.dropbox.com/s/d05p6jl55a2zm8s/efficientnetb0-93624d.pth?dl=1',
-    'efficientnet-b1': 'https://www.dropbox.com/s/kxrdznk7s7g885f/efficientnetb1-12d34e.pth?dl=1',
-    'efficientnet-b2': 'https://www.dropbox.com/s/pzwztskhm2rwcae/efficientnetb2-f03b76.pth?dl=1',
-    'efficientnet-b3': 'https://www.dropbox.com/s/q3a2o1fq0sbqkr5/efficientnetb3-108f55.pth?dl=1',
-    'efficientnet-b4': 'https://www.dropbox.com/s/w1sxdltcu3f7ppj/efficientnetb4-5f4b22.pth?dl=1',
-    'efficientnet-b5': 'https://www.dropbox.com/s/kc5v3wsqjq6sunp/efficientnetb5-18781f.pth?dl=1',
-    'efficientnet-b6': None,
-    'efficientnet-b7': None,
+    'efficientnet_b0': 'https://www.dropbox.com/s/d05p6jl55a2zm8s/efficientnetb0-93624d.pth?dl=1',
+    'efficientnet_b1': 'https://www.dropbox.com/s/kxrdznk7s7g885f/efficientnetb1-12d34e.pth?dl=1',
+    'efficientnet_b2': 'https://www.dropbox.com/s/pzwztskhm2rwcae/efficientnetb2-f03b76.pth?dl=1',
+    'efficientnet_b3': 'https://www.dropbox.com/s/q3a2o1fq0sbqkr5/efficientnetb3-108f55.pth?dl=1',
+    'efficientnet_b4': 'https://www.dropbox.com/s/w1sxdltcu3f7ppj/efficientnetb4-5f4b22.pth?dl=1',
+    'efficientnet_b5': 'https://www.dropbox.com/s/kc5v3wsqjq6sunp/efficientnetb5-18781f.pth?dl=1',
+    'efficientnet_b6': None,
+    'efficientnet_b7': None,
+}
+
+params = {
+    'efficientnet_b0': (1.0, 1.0, 224, 0.2),
+    'efficientnet_b1': (1.0, 1.1, 240, 0.2),
+    'efficientnet_b2': (1.1, 1.2, 260, 0.3),
+    'efficientnet_b3': (1.2, 1.4, 300, 0.3),
+    'efficientnet_b4': (1.4, 1.8, 380, 0.4),
+    'efficientnet_b5': (1.6, 2.2, 456, 0.4),
+    'efficientnet_b6': (1.8, 2.6, 528, 0.5),
+    'efficientnet_b7': (2.0, 3.1, 600, 0.5),
 }
 
 
@@ -193,17 +204,7 @@ class EfficientNet(nn.Module):
 
 
 def _efficientnet(arch, pretrained, progress, **kwargs):
-    params = {
-        'efficientnet-b0': (1.0, 1.0, 224, 0.2),
-        'efficientnet-b1': (1.0, 1.1, 240, 0.2),
-        'efficientnet-b2': (1.1, 1.2, 260, 0.3),
-        'efficientnet-b3': (1.2, 1.4, 300, 0.3),
-        'efficientnet-b4': (1.4, 1.8, 380, 0.4),
-        'efficientnet-b5': (1.6, 2.2, 456, 0.4),
-        'efficientnet-b6': (1.8, 2.6, 528, 0.5),
-        'efficientnet-b7': (2.0, 3.1, 600, 0.5),
-    }
-    width_mult, depth_mult, resolution, dropout_rate = params[arch]
+    width_mult, depth_mult, _, dropout_rate = params[arch]
     model = EfficientNet(width_mult, depth_mult, dropout_rate, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
@@ -212,32 +213,32 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
 
 
 def efficientnet_b0(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b0', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b0', pretrained, progress, **kwargs)
 
 
 def efficientnet_b1(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b1', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b1', pretrained, progress, **kwargs)
 
 
 def efficientnet_b2(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b2', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b2', pretrained, progress, **kwargs)
 
 
 def efficientnet_b3(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b3', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b3', pretrained, progress, **kwargs)
 
 
 def efficientnet_b4(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b4', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b4', pretrained, progress, **kwargs)
 
 
 def efficientnet_b5(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b5', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b5', pretrained, progress, **kwargs)
 
 
 def efficientnet_b6(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b6', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b6', pretrained, progress, **kwargs)
 
 
 def efficientnet_b7(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet-b7', pretrained, progress, **kwargs)
+    return _efficientnet('efficientnet_b7', pretrained, progress, **kwargs)
