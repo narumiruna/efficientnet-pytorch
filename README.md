@@ -17,6 +17,12 @@ https://arxiv.org/abs/1905.11946
 $ python train.py -c /path/to/config -r /path/to/dataset
 ```
 
+### Evaluate
+
+```shell
+$ python evaluate.py --arch efficientnet_b0 -r /path/to/dataset
+```
+
 ## Pretrained models
 
 | Model Name | Top-1 Accuracy |
