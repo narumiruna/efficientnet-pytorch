@@ -27,12 +27,12 @@ $ python evaluate.py --arch efficientnet_b0 -r /path/to/dataset
 
 | Model Name | Top-1 Accuracy |
 | ------ | ------ |
-| efficientnet_b0 | 75.74% |
-| efficientnet_b1 |  |
-| efficientnet_b2 |  |
-| efficientnet_b3 |  |
-| efficientnet_b4 |  |
-| efficientnet_b5 |  |
+| efficientnet_b0 | 76.52% |
+| efficientnet_b1 | 77.79% |
+| efficientnet_b2 | 78.82% |
+| efficientnet_b3 | 80.19% |
+| efficientnet_b4 | 81.86% |
+| efficientnet_b5 | 82.91% |
 | efficientnet_b6 |  |
 | efficientnet_b7 |  |
 
