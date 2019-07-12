@@ -8,6 +8,23 @@ from torchvision import datasets, transforms
 from ..utils import distributed_is_initialized
 
 
+class PadCenterCrop(object):
+
+    def __init__(self, size, crop_padding=32, interpolation=Image.BILINEAR):
+        self.size = size
+        self.crop_padding = crop_padding
+        self.interpolation = interpolation
+
+    def __call__(self, img):
+        w, h = img.size
+        padded_center_crop_size = int((self.size / (self.size + self.crop_padding)) * min(w, h))
+        offset_h = (h - padded_center_crop_size + 1) // 2
+        offset_w = (w - padded_center_crop_size + 1) // 2
+        box = (offset_w, offset_h, offset_w + padded_center_crop_size, offset_h + padded_center_crop_size)
+        crop_img = img.crop(box)
+        return crop_img.resize(self.size, self.interpolation)
+
+
 class ImageNetDataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs):
@@ -17,14 +34,14 @@ class ImageNetDataLoader(data.DataLoader):
 
         if train:
             transform = transforms.Compose([
-                transforms.RandomResizedCrop(image_size),
+                transforms.RandomResizedCrop(image_size, interpolation=Image.BICUBIC),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
             ])
         else:
             transform = transforms.Compose([
-                transforms.Resize(int(image_size * 256 / 224), interpolation=Image.BICUBIC),
+                transforms.Resize(image_size + 32, interpolation=Image.BICUBIC),
                 transforms.CenterCrop(image_size),
                 transforms.ToTensor(),
                 normalize,
@@ -37,8 +54,11 @@ class ImageNetDataLoader(data.DataLoader):
         if train and distributed_is_initialized():
             sampler = data.distributed.DistributedSampler(dataset)
 
-        super(ImageNetDataLoader, self).__init__(
-            dataset, batch_size=batch_size, shuffle=(sampler is None), sampler=sampler, **kwargs)
+        super(ImageNetDataLoader, self).__init__(dataset,
+                                                 batch_size=batch_size,
+                                                 shuffle=(sampler is None),
+                                                 sampler=sampler,
+                                                 **kwargs)
 
 
 def imagenet_dataloaders(root: str, image_size: int, batch_size: int, **kwargs):

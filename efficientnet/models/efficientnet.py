@@ -6,12 +6,12 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet_b0': 'https://www.dropbox.com/s/d05p6jl55a2zm8s/efficientnetb0-93624d.pth?dl=1',
-    'efficientnet_b1': 'https://www.dropbox.com/s/kxrdznk7s7g885f/efficientnetb1-12d34e.pth?dl=1',
-    'efficientnet_b2': 'https://www.dropbox.com/s/pzwztskhm2rwcae/efficientnetb2-f03b76.pth?dl=1',
-    'efficientnet_b3': 'https://www.dropbox.com/s/q3a2o1fq0sbqkr5/efficientnetb3-108f55.pth?dl=1',
-    'efficientnet_b4': 'https://www.dropbox.com/s/w1sxdltcu3f7ppj/efficientnetb4-5f4b22.pth?dl=1',
-    'efficientnet_b5': 'https://www.dropbox.com/s/kc5v3wsqjq6sunp/efficientnetb5-18781f.pth?dl=1',
+    'efficientnet_b0': 'https://www.dropbox.com/s/9wigibun8n260qm/efficientnet-b0-4cfa50.pth?dl=1',
+    'efficientnet_b1': 'https://www.dropbox.com/s/6745ear79b1ltkh/efficientnet-b1-ef6aa7.pth?dl=1',
+    'efficientnet_b2': 'https://www.dropbox.com/s/0dhtv1t5wkjg0iy/efficientnet-b2-7c98aa.pth?dl=1',
+    'efficientnet_b3': 'https://www.dropbox.com/s/5uqok5gd33fom5p/efficientnet-b3-bdc7f4.pth?dl=1',
+    'efficientnet_b4': 'https://www.dropbox.com/s/y2nqt750lixs8kc/efficientnet-b4-3e4967.pth?dl=1',
+    'efficientnet_b5': 'https://www.dropbox.com/s/qxonlu3q02v9i47/efficientnet-b5-4c7978.pth?dl=1',
     'efficientnet_b6': None,
     'efficientnet_b7': None,
 }
