@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=128)
     parser.add_argument('-w', '--weight', type=str, default=None)
     parser.add_argument('--num-workers', type=int, default=8)
+    parser.add_argument('--no-cuda', action='store_true')
     return parser.parse_args()
 
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
 
 
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() and not args.no_cuda else 'cpu')
 
     if args.weight is not None:
         model = ModelFactory.create(name=args.arch)
