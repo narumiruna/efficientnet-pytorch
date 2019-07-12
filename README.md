@@ -32,7 +32,7 @@ $ python evaluate.py --arch efficientnet_b0 -r /path/to/dataset
 | efficientnet_b2 | 78.83% |
 | efficientnet_b3 | 80.19% |
 | efficientnet_b4 | 82.27% |
-| efficientnet_b5 | 82.91% |
+| efficientnet_b5 | 83.11% |
 | efficientnet_b6 |  |
 | efficientnet_b7 |  |
 
