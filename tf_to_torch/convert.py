@@ -4,13 +4,12 @@ import numpy as np
 import tensorflow as tf
 import torch
 
-from efficientnet import efficientnet_b0
+import efficientnet
 from eval_ckpt_main import EvalCkptDriver
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ckpt-dir', type=str, default='efficientnet-b0')
     parser.add_argument('--model-name', type=str, default='efficientnet-b0')
     parser.add_argument('--image-file', type=str, default='panda.jpg')
     return parser.parse_args()
@@ -44,9 +43,9 @@ def get_trained_parameters(model_name, image_files, ckpt_dir):
 
 def main():
     args = parse_args()
-    trained_params = get_trained_parameters(args.model_name, [args.image_file], args.ckpt_dir)
+    trained_params = get_trained_parameters(args.model_name, [args.image_file], args.model_name)
 
-    model = efficientnet_b0()
+    model = getattr(efficientnet, args.model_name.replace('-', '_'))()
     model.eval()
 
     state_dict = model.state_dict()
