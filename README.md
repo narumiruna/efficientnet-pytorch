@@ -25,6 +25,8 @@ $ python evaluate.py --arch efficientnet_b0 -r /path/to/dataset
 
 ## Pretrained models
 
+Source: https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet
+
 | Model Name | Top-1 Accuracy |
 | ------ | ------ |
 | efficientnet_b0 | 76.52% |
