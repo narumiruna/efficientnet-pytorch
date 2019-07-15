@@ -32,13 +32,13 @@ class AttrDict(dict):
     def set_immutable(self):
         self.__dict__[AttrDict.IMMUTABLE] = True
 
-        for v in self.__dict__.values():
-            if isinstance(v, AttrDict):
-                self.set_immutable()
+        for value in self.__dict__.values():
+            if isinstance(value, AttrDict):
+                value.set_immutable()
 
-        for v in self.values():
-            if isinstance(v, AttrDict):
-                self.set_immutable()
+        for value in self.values():
+            if isinstance(value, AttrDict):
+                value.set_immutable()
 
     def is_immutable(self):
         return self.__dict__[AttrDict.IMMUTABLE]
