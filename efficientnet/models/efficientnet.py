@@ -208,7 +208,12 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
     model = EfficientNet(width_mult, depth_mult, dropout_rate, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
-        model.load_state_dict(state_dict)
+
+        if 'num_classes' in kwargs and kwargs['num_classes'] != 1000:
+            del state_dict['classifier.1.weight']
+            del state_dict['classifier.1.bias']
+
+        model.load_state_dict(state_dict, strict=False)
     return model
 
 
