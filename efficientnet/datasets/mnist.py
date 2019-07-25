@@ -2,6 +2,12 @@ from torch.utils import data
 from torchvision import datasets, transforms
 
 
+class Expand(object):
+
+    def __call__(self, t):
+        return t.expand(3, t.size(1), t.size(2))
+
+
 class MNISTDataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool, **kwargs):
@@ -9,6 +15,7 @@ class MNISTDataLoader(data.DataLoader):
             transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,)),
+            Expand(),
         ])
 
         dataset = datasets.MNIST(

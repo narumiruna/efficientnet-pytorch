@@ -143,7 +143,7 @@ def _round_repeats(repeats, depth_mult):
 
 class EfficientNet(nn.Module):
 
-    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000, in_channels=3):
+    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -160,9 +160,9 @@ class EfficientNet(nn.Module):
         # yapf: enable
 
         out_channels = _round_filters(32, width_mult)
-        features = [ConvBNReLU(in_channels, out_channels, 3, stride=2)]
-        in_channels = out_channels
+        features = [ConvBNReLU(3, out_channels, 3, stride=2)]
 
+        in_channels = out_channels
         for t, c, n, s, k in settings:
             out_channels = _round_filters(c, width_mult)
             repeats = _round_repeats(n, depth_mult)

@@ -6,24 +6,22 @@ output_dir: experiments/mnist
 model:
   name: efficientnet_b0
   num_classes: 10
-  in_channels: 1
 
 dataset:
   name: mnist_dataloaders
   root: data
-  batch_size: 128
+  batch_size: 32
   image_size: 224
   num_workers: 16
 
 optimizer:
   name: SGD
-  lr: 0.05
+  lr: 1.25e-2
   weight_decay: 1.e-4
   momentum: 0.9
   nesterov: true
 
 scheduler:
-  name: MultiStepLR 
+  name: MultiStepLR
   milestones: [30, 60, 80]
   gamma: 0.1
-

@@ -6,18 +6,17 @@ output_dir: experiments/cifar10
 model:
   name: efficientnet_b0
   num_classes: 10
-  in_channels: 3
 
 dataset:
   name: cifar10_dataloaders
   root: data
-  batch_size: 64
+  batch_size: 32
   image_size: 224
   num_workers: 16
 
 optimizer:
   name: SGD
-  lr: 2.5e-2
+  lr: 1.25e-2
   weight_decay: 1.e-4
   momentum: 0.9
   nesterov: true

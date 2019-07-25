@@ -6,7 +6,6 @@ output_dir: experiments/imagenet
 model:
   name: efficientnet_b0
   num_classes: 1000
-  in_channels: 3
 
 dataset:
   name: imagenet_dataloaders
