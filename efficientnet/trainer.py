@@ -10,7 +10,6 @@ from torch.utils import data
 from tqdm import tqdm, trange
 
 from .metrics import Accuracy, Average
-from .warmup import GradualWarmup
 
 
 class AbstractTrainer(metaclass=ABCMeta):
@@ -51,18 +50,7 @@ class Trainer(AbstractTrainer):
         self.start_epoch = 1
         self.best_acc = 0
 
-    def get_warmup_iterations(self):
-        warmup_epochs = 5
-
-        num_samples = len(self.train_loader.dataset)
-        batch_size = self.train_loader.batch_size
-        num_training_iterations = math.ceil(num_samples / batch_size)
-
-        return num_training_iterations * warmup_epochs
-
     def fit(self, num_epochs):
-        self.warmup = GradualWarmup(self.optimizer, total_iterations=self.get_warmup_iterations())
-
         epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
         for epoch in epochs:
             self.scheduler.step()
@@ -91,8 +79,6 @@ class Trainer(AbstractTrainer):
 
         train_loader = tqdm(self.train_loader, ncols=0, desc='Train')
         for x, y in train_loader:
-            self.warmup.step()
-
             x = x.to(self.device)
             y = y.to(self.device)
 

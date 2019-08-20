@@ -10,18 +10,19 @@ model:
 dataset:
   name: imagenet_dataloaders
   root: data
-  batch_size: 128
+  batch_size: 32
   image_size: 224
   num_workers: 16
 
 optimizer:
   name: TFRMSprop
-  lr: 0.05
-  alpha: 0.9
+  lr: 0.0125
+  rho: 0.9
   momentum: 0.9
   eps: 1.e-3
+  warmup: 200185
+  weight_decay: 1.e-5
 
 scheduler:
-  name: MultiStepLR
-  milestones: [30, 60, 80]
-  gamma: 0.1
+  name: ExponentialLR
+  gamma: 0.98738885893
