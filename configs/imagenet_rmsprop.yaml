@@ -1,6 +1,6 @@
 use_cuda: true
 data_parallel: true
-num_epochs: 90
+num_epochs: 300
 output_dir: experiments/imagenet
 
 model:
@@ -17,11 +17,11 @@ dataset:
 optimizer:
   name: TFRMSprop
   lr: 0.0125
-  rho: 0.9
-  momentum: 0.9
-  eps: 1.e-3
-  warmup: 200185
   weight_decay: 1.e-5
+  rho: 0.9
+  eps: 1.e-3
+  momentum: 0.9
+  warmup: 200185
 
 scheduler:
   name: ExponentialLR
