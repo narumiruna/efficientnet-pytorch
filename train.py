@@ -69,8 +69,8 @@ def main():
 
     optimizer = OptimFactory.create(model.parameters(), **config.optimizer)
     scheduler = SchedulerFactory.create(optimizer, **config.scheduler)
-
-    train_loader, valid_loader = DatasetFactory.create(**config.dataset)
+    train_loader = DatasetFactory.create(train=True, **config.dataset)
+    valid_loader = DatasetFactory.create(train=False, **config.dataset)
 
     trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.output_dir)
 

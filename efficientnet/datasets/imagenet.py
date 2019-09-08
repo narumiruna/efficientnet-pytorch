@@ -59,9 +59,3 @@ class ImageNetDataLoader(data.DataLoader):
                                                  shuffle=(sampler is None),
                                                  sampler=sampler,
                                                  **kwargs)
-
-
-def imagenet_dataloaders(root: str, image_size: int, batch_size: int, **kwargs):
-    train_loader = ImageNetDataLoader(root, image_size, True, batch_size, **kwargs)
-    valid_loader = ImageNetDataLoader(root, image_size, False, batch_size, **kwargs)
-    return train_loader, valid_loader

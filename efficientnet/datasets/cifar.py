@@ -25,9 +25,3 @@ class CIFAR10DataLoader(data.DataLoader):
         dataset = datasets.CIFAR10(root, train=train, transform=transform, download=True)
 
         super(CIFAR10DataLoader, self).__init__(dataset=dataset, batch_size=batch_size, shuffle=shuffle, **kwargs)
-
-
-def cifar10_dataloaders(root='data', image_size=32, batch_size=128, **kwargs):
-    train_loader = CIFAR10DataLoader(root, image_size, train=True, batch_size=batch_size, shuffle=True, **kwargs)
-    test_loader = CIFAR10DataLoader(root, image_size, train=False, batch_size=batch_size, shuffle=False, **kwargs)
-    return train_loader, test_loader
