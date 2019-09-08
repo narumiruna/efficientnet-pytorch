@@ -8,7 +8,7 @@ model:
   num_classes: 10
 
 dataset:
-  name: cifar10_dataloaders
+  name: CIFAR10DataLoader
   root: data
   batch_size: 32
   image_size: 224
