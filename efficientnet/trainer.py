@@ -1,4 +1,3 @@
-import math
 import os
 import shutil
 from abc import ABCMeta, abstractmethod

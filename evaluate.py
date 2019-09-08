@@ -47,8 +47,6 @@ def evaluate(model, valid_loader, device):
 if __name__ == '__main__':
     args = parse_args()
 
-
-
     device = torch.device('cuda' if torch.cuda.is_available() and not args.no_cuda else 'cpu')
 
     if args.weight is not None:

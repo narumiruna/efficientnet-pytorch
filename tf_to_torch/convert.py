@@ -37,7 +37,6 @@ def get_trained_parameters(model_name, image_files, ckpt_dir):
 
             trained_params.append(torch.from_numpy(param))
 
-
     return trained_params
 
 
