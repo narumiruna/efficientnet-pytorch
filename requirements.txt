@@ -3,3 +3,4 @@ torchvision==0.2.2.post3
 pyyaml
 scipy
 tqdm
+mlconfig
