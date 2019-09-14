@@ -4,7 +4,6 @@ import mlconfig
 import torch
 from torch import distributed, nn
 
-from efficientnet.trainer import Trainer
 from efficientnet.utils import distributed_is_initialized
 
 
