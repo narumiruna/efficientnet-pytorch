@@ -53,14 +53,10 @@ class Trainer(AbstractTrainer):
             train_loss, train_acc = self.train()
             valid_loss, valid_acc = self.evaluate()
 
-            last_checkpoint = os.path.join(self.output_dir, 'checkpoint.pth')
-            best_checkpoint = os.path.join(self.output_dir, 'best.pth')
-            if valid_acc.accuracy > self.best_acc:
-                self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(last_checkpoint)
-                shutil.copy(last_checkpoint, best_checkpoint)
-            else:
-                self.save_checkpoint(last_checkpoint)
+            self.save_checkpoint(os.path.join(self.output_dir, 'checkpoint.pth'))
+            if valid_acc > self.best_acc:
+                self.best_acc = valid_acc.value
+                self.save_checkpoint(os.path.join(self.output_dir, 'best.pth'))
 
             epochs.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '

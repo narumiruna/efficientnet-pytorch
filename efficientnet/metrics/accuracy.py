@@ -2,8 +2,10 @@ from __future__ import division
 
 import torch
 
+from .metric import Metric
 
-class Accuracy(object):
+
+class Accuracy(Metric):
 
     def __init__(self, top_k=1):
         self.top_k = top_k
@@ -23,8 +25,8 @@ class Accuracy(object):
         self.count += output.size(0)
 
     @property
-    def accuracy(self):
+    def value(self):
         return 100 * self.correct / self.count
 
     def __str__(self):
-        return '{:.2f}%'.format(self.accuracy)
+        return '{:.2f}%'.format(self.value)
