@@ -1,12 +1,9 @@
 import argparse
 
+import mlconfig
 import torch
 from torch import distributed, nn
 
-from efficientnet import Config
-from efficientnet.datasets import DatasetFactory
-from efficientnet.models import ModelFactory
-from efficientnet.optim import OptimFactory, SchedulerFactory
 from efficientnet.trainer import Trainer
 from efficientnet.utils import distributed_is_initialized
 
@@ -14,8 +11,9 @@ from efficientnet.utils import distributed_is_initialized
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='configs/mnist.yaml')
-    parser.add_argument('-r', '--root', type=str, help='Path to dataset.')
     parser.add_argument('--resume', type=str, default=None)
+    parser.add_argument('--no-cuda', action='store_true')
+    parser.add_argument('--data-parallel', action='store_true')
 
     # distributed
     parser.add_argument('--backend', type=str, default='nccl')
@@ -35,49 +33,38 @@ def init_process(backend, init_method, world_size, rank):
     )
 
 
-def load_config():
-    args = parse_args()
-    config = Config.from_yaml(args.config)
-
-    if args.root:
-        config.dataset.root = args.root
-
-    config.update(vars(args))
-
-    return config
-
-
 def main():
     torch.backends.cudnn.benchmark = True
 
-    config = load_config()
+    args = parse_args()
+    config = mlconfig.load(args.config)
     print(config)
 
-    if config.world_size > 1:
-        init_process(config.backend, config.init_method, config.world_size, config.rank)
+    if args.world_size > 1:
+        init_process(args.backend, args.init_method, args.world_size, args.rank)
 
-    device = torch.device('cuda' if torch.cuda.is_available() and config.use_cuda else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() and not args.no_cuda else 'cpu')
 
-    model = ModelFactory.create(**config.model)
+    model = config.model()
     if distributed_is_initialized():
         model.to(device)
         model = nn.parallel.DistributedDataParallel(model)
     else:
-        if config.data_parallel:
+        if args.data_parallel:
             model = nn.DataParallel(model)
         model.to(device)
 
-    optimizer = OptimFactory.create(model.parameters(), **config.optimizer)
-    scheduler = SchedulerFactory.create(optimizer, **config.scheduler)
-    train_loader = DatasetFactory.create(train=True, **config.dataset)
-    valid_loader = DatasetFactory.create(train=False, **config.dataset)
+    optimizer = config.optimizer(model.parameters())
+    scheduler = config.scheduler(optimizer)
+    train_loader = config.dataset(train=True)
+    valid_loader = config.dataset(train=False)
 
-    trainer = Trainer(model, optimizer, train_loader, valid_loader, scheduler, device, config.output_dir)
+    trainer = config.trainer(model, optimizer, train_loader, valid_loader, scheduler, device)
 
-    if config.resume is not None:
-        trainer.resume(config.resume)
+    if args.resume is not None:
+        trainer.resume(args.resume)
 
-    trainer.fit(config.num_epochs)
+    trainer.fit()
 
 
 if __name__ == "__main__":
