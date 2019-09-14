@@ -1,7 +1,9 @@
+import mlconfig
 from torch.utils import data
 from torchvision import datasets, transforms
 
 
+@mlconfig.register
 class CIFAR10DataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool, **kwargs):

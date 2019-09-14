@@ -1,6 +1,7 @@
 import os
 import warnings
 
+import mlconfig
 from PIL import Image
 from torch.utils import data
 from torchvision import datasets, transforms
@@ -25,6 +26,7 @@ class PadCenterCrop(object):
         return crop_img.resize(self.size, self.interpolation)
 
 
+@mlconfig.register
 class ImageNetDataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs):

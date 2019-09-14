@@ -2,6 +2,7 @@ import os
 import shutil
 from abc import ABCMeta, abstractmethod
 
+import mlconfig
 import torch
 import torch.nn.functional as F
 from torch import nn, optim
@@ -26,32 +27,27 @@ class AbstractTrainer(metaclass=ABCMeta):
         raise NotImplementedError
 
 
+@mlconfig.register
 class Trainer(AbstractTrainer):
 
-    def __init__(
-            self,
-            model: nn.Module,
-            optimizer: optim.Optimizer,
-            train_loader: data.DataLoader,
-            valid_loader: data.DataLoader,
-            scheduler: optim.lr_scheduler._LRScheduler,
-            device: torch.device,
-            output_dir: str,
-    ):
+    def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_loader: data.DataLoader,
+                 valid_loader: data.DataLoader, scheduler: optim.lr_scheduler._LRScheduler, device: torch.device,
+                 num_epochs: int, output_dir: str):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.device = device
+        self.num_epochs = num_epochs
         self.output_dir = output_dir
 
-        self.start_epoch = 1
+        self.epoch = 1
         self.best_acc = 0
 
-    def fit(self, num_epochs):
-        epochs = trange(self.start_epoch, num_epochs + 1, desc='Epoch', ncols=0)
-        for epoch in epochs:
+    def fit(self):
+        epochs = trange(self.epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+        for self.epoch in epochs:
             self.scheduler.step()
 
             train_loss, train_acc = self.train()
@@ -61,10 +57,10 @@ class Trainer(AbstractTrainer):
             best_checkpoint = os.path.join(self.output_dir, 'best.pth')
             if valid_acc.accuracy > self.best_acc:
                 self.best_acc = valid_acc.accuracy
-                self.save_checkpoint(epoch, last_checkpoint)
+                self.save_checkpoint(last_checkpoint)
                 shutil.copy(last_checkpoint, best_checkpoint)
             else:
-                self.save_checkpoint(epoch, last_checkpoint)
+                self.save_checkpoint(last_checkpoint)
 
             epochs.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, '
                                    f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
@@ -117,14 +113,14 @@ class Trainer(AbstractTrainer):
 
         return valid_loss, valid_acc
 
-    def save_checkpoint(self, epoch, f):
+    def save_checkpoint(self, f):
         self.model.eval()
 
         checkpoint = {
             'model': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
             'scheduler': self.scheduler.state_dict(),
-            'epoch': epoch,
+            'epoch': self.epoch,
             'best_acc': self.best_acc
         }
 
@@ -141,5 +137,5 @@ class Trainer(AbstractTrainer):
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         self.scheduler.load_state_dict(checkpoint['scheduler'])
 
-        self.start_epoch = checkpoint['epoch'] + 1
+        self.epoch = checkpoint['epoch'] + 1
         self.best_acc = checkpoint['best_acc']

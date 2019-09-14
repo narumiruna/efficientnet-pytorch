@@ -1,5 +1,6 @@
 import math
 
+import mlconfig
 import torch
 from torch import nn
 
@@ -141,6 +142,7 @@ def _round_repeats(repeats, depth_mult):
     return int(math.ceil(depth_mult * repeats))
 
 
+@mlconfig.register
 class EfficientNet(nn.Module):
 
     def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000):
@@ -217,33 +219,41 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
     return model
 
 
+@mlconfig.register
 def efficientnet_b0(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b0', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b1(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b1', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b2(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b2', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b3(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b3', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b4(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b4', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b5(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b5', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b6(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b6', pretrained, progress, **kwargs)
 
 
+@mlconfig.register
 def efficientnet_b7(pretrained=False, progress=True, **kwargs):
     return _efficientnet('efficientnet_b7', pretrained, progress, **kwargs)

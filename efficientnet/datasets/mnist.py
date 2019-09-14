@@ -1,3 +1,4 @@
+import mlconfig
 from torch.utils import data
 from torchvision import datasets, transforms
 
@@ -8,6 +9,7 @@ class Expand(object):
         return t.expand(3, t.size(1), t.size(2))
 
 
+@mlconfig.register
 class MNISTDataLoader(data.DataLoader):
 
     def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs):
