@@ -17,7 +17,7 @@ dataset:
 optimizer:
   name: TFRMSprop
   lr: 0.0125
-  weight_decay: 1.e-5
+  weight_decay: 0
   rho: 0.9
   eps: 1.e-3
   momentum: 0.9
