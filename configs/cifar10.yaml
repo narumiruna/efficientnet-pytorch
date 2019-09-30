@@ -1,5 +1,5 @@
 trainer:
-  name: "Trainer"
+  name: Trainer
   num_epochs: 90
   output_dir: experiments/cifar10
 
