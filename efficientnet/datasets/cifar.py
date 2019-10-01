@@ -6,7 +6,7 @@ from torchvision import datasets, transforms
 @mlconfig.register
 class CIFAR10DataLoader(data.DataLoader):
 
-    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool, **kwargs):
+    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool = True, **kwargs):
         normalize = transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2470, 0.2435, 0.2616))
 
         if train:
