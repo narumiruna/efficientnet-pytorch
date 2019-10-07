@@ -127,7 +127,7 @@ class Trainer(AbstractTrainer):
         torch.save(checkpoint, f)
 
     def resume(self, f):
-        checkpoint = torch.load(f, map_location='cpu')
+        checkpoint = torch.load(f, map_location=self.device)
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
