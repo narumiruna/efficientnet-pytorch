@@ -4,9 +4,9 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 
+from efficientnet import models
 from efficientnet.datasets.imagenet import ImageNetDataLoader
 from efficientnet.metrics import Accuracy, Average
-from efficientnet.models import ModelFactory
 from efficientnet.models.efficientnet import params
 
 
@@ -49,12 +49,10 @@ if __name__ == '__main__':
 
     device = torch.device('cuda' if torch.cuda.is_available() and not args.no_cuda else 'cpu')
 
+    model = getattr(models, args.arch)(pretrained=(args.weight is None))
     if args.weight is not None:
-        model = ModelFactory.create(name=args.arch)
         state_dict = torch.load(args.weight, map_location='cpu')
         model.load_state_dict(state_dict)
-    else:
-        model = ModelFactory.create(name=args.arch, pretrained=True)
     model.to(device)
 
     image_size = params[args.arch][2]
