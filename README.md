@@ -14,7 +14,7 @@ https://arxiv.org/abs/1905.11946
 ### Train
 
 ```shell
-$ python train.py -c /path/to/config -r /path/to/dataset
+$ python train.py -c /path/to/config
 ```
 
 ### Evaluate
