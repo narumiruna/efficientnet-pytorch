@@ -8,8 +8,16 @@ https://arxiv.org/abs/1905.11946
 - Python 3
   - torch 1.0.1
   - torchvision 0.2.2.post3
+  - tqdm
+  - mlconfig
 
 ## Usage
+
+## Torch Hub
+
+```python
+model = torch.hub.load('narumiruna/efficientnet-pytorch', 'efficientnet_b0', pretrained=True)
+```
 
 ### Train
 
