@@ -1,4 +1,4 @@
-dependencies = ['torch', 'mlconfig']
+dependencies = ['torch', 'mlconfig', 'tqdm']
 
 
 from efficientnet.models.efficientnet import efficientnet_b0
