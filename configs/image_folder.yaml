@@ -1,0 +1,31 @@
+trainer:
+  name: Trainer
+  num_epochs: 300
+  output_dir: experiments/imagenet
+
+model:
+  name: efficientnet_b0
+  num_classes: 2
+  pretrained: True
+
+dataset:
+  name: ImageFolderDataLoader
+  root: data
+  batch_size: 4
+  image_size: 224
+  num_workers: 8
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+optimizer:
+  name: TFRMSprop
+  lr: 0.0125
+  weight_decay: 0
+  rho: 0.9
+  eps: 1.e-3
+  momentum: 0.9
+  warmup: 200185
+
+scheduler:
+  name: ExponentialLR
+  gamma: 0.98738885893
