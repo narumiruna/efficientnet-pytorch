@@ -25,6 +25,30 @@ model = torch.hub.load('narumiruna/efficientnet-pytorch', 'efficientnet_b0', pre
 $ python train.py -c /path/to/config
 ```
 
+#### Distributed example
+
+Node 1: (IP: 192.168.1.1, has free port:1234)
+```shell
+$ python3 -m torch.distributed.launch \
+    --nproc_per_node=1 \
+    --nnodes=2 \
+    --node_rank=0 \
+    --master_addr="192.168.1.1" \
+    --master_port=1234 \
+    train.py -c configs/mnist.yaml
+```
+
+Node 2:
+```shell
+$ python3 -m torch.distributed.launch \
+    --nproc_per_node=1 \
+    --nnodes=2 \
+    --node_rank=1 \
+    --master_addr="192.168.1.1" \
+    --master_port=1234 \
+    train.py -c configs/mnist.yaml
+```
+
 ### Evaluate
 
 ```shell
