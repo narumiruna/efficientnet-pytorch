@@ -49,8 +49,8 @@ class ImageNetDataLoader(data.DataLoader):
                 normalize,
             ])
 
-        split = 'train' if train else 'val'
-        dataset = datasets.ImageFolder(os.path.join(root, split), transform=transform)
+        phase = 'train' if train else 'val'
+        dataset = datasets.ImageFolder(os.path.join(root, phase), transform=transform)
 
         sampler = None
         if train and distributed_is_initialized():
