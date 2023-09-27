@@ -6,7 +6,8 @@ from tqdm import tqdm
 
 from efficientnet import models
 from efficientnet.datasets.imagenet import ImageNetDataLoader
-from efficientnet.metrics import Accuracy, Average
+from efficientnet.metrics import Accuracy
+from efficientnet.metrics import Average
 from efficientnet.models.efficientnet import params
 
 
@@ -21,27 +22,27 @@ def parse_args():
     return parser.parse_args()
 
 
+@torch.no_grad()
 def evaluate(model, valid_loader, device):
     model.eval()
 
     valid_loss = Average()
     valid_acc = Accuracy()
 
-    with torch.no_grad():
-        valid_loader = tqdm(valid_loader, desc="Validate", ncols=0)
-        for x, y in valid_loader:
-            x = x.to(device)
-            y = y.to(device)
+    valid_loader = tqdm(valid_loader, desc="Validate", ncols=0)
+    for x, y in valid_loader:
+        x = x.to(device)
+        y = y.to(device)
 
-            output = model(x)
-            loss = F.cross_entropy(output, y)
+        output = model(x)
+        loss = F.cross_entropy(output, y)
 
-            valid_loss.update(loss.item(), number=x.size(0))
-            valid_acc.update(output, y)
+        valid_loss.update(loss.item(), number=x.size(0))
+        valid_acc.update(output, y)
 
-            valid_loader.set_postfix_str(
-                f"valid loss: {valid_loss}, valid acc: {valid_acc}."
-            )
+        valid_loader.set_postfix_str(
+            f"valid loss: {valid_loss}, valid acc: {valid_acc}."
+        )
 
     return valid_loss, valid_acc
 
