@@ -8,7 +8,7 @@ def numel(model):
 
 
 def test_output(model, size):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model.to(device)
     model.eval()
@@ -21,14 +21,14 @@ def test_output(model, size):
 
 def print_num_parameters(model):
     num_params = numel(model)
-    print(f'Number of parameters: {num_params}')
+    print(f"Number of parameters: {num_params}")
 
 
 def main():
     for arch, (w, d, s, r) in params.items():
         model = EfficientNet(w, d, r)
 
-        print(f'Arch: {arch}, settings: {(w, d, s, r)}')
+        print(f"Arch: {arch}, settings: {(w, d, s, r)}")
         test_output(model, s)
         print_num_parameters(model)
 

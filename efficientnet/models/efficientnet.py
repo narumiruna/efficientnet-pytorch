@@ -7,30 +7,29 @@ from torch import nn
 from .utils import load_state_dict_from_url
 
 model_urls = {
-    'efficientnet_b0': 'https://www.dropbox.com/s/9wigibun8n260qm/efficientnet-b0-4cfa50.pth?dl=1',
-    'efficientnet_b1': 'https://www.dropbox.com/s/6745ear79b1ltkh/efficientnet-b1-ef6aa7.pth?dl=1',
-    'efficientnet_b2': 'https://www.dropbox.com/s/0dhtv1t5wkjg0iy/efficientnet-b2-7c98aa.pth?dl=1',
-    'efficientnet_b3': 'https://www.dropbox.com/s/5uqok5gd33fom5p/efficientnet-b3-bdc7f4.pth?dl=1',
-    'efficientnet_b4': 'https://www.dropbox.com/s/y2nqt750lixs8kc/efficientnet-b4-3e4967.pth?dl=1',
-    'efficientnet_b5': 'https://www.dropbox.com/s/qxonlu3q02v9i47/efficientnet-b5-4c7978.pth?dl=1',
-    'efficientnet_b6': None,
-    'efficientnet_b7': None,
+    "efficientnet_b0": "https://www.dropbox.com/s/9wigibun8n260qm/efficientnet-b0-4cfa50.pth?dl=1",
+    "efficientnet_b1": "https://www.dropbox.com/s/6745ear79b1ltkh/efficientnet-b1-ef6aa7.pth?dl=1",
+    "efficientnet_b2": "https://www.dropbox.com/s/0dhtv1t5wkjg0iy/efficientnet-b2-7c98aa.pth?dl=1",
+    "efficientnet_b3": "https://www.dropbox.com/s/5uqok5gd33fom5p/efficientnet-b3-bdc7f4.pth?dl=1",
+    "efficientnet_b4": "https://www.dropbox.com/s/y2nqt750lixs8kc/efficientnet-b4-3e4967.pth?dl=1",
+    "efficientnet_b5": "https://www.dropbox.com/s/qxonlu3q02v9i47/efficientnet-b5-4c7978.pth?dl=1",
+    "efficientnet_b6": None,
+    "efficientnet_b7": None,
 }
 
 params = {
-    'efficientnet_b0': (1.0, 1.0, 224, 0.2),
-    'efficientnet_b1': (1.0, 1.1, 240, 0.2),
-    'efficientnet_b2': (1.1, 1.2, 260, 0.3),
-    'efficientnet_b3': (1.2, 1.4, 300, 0.3),
-    'efficientnet_b4': (1.4, 1.8, 380, 0.4),
-    'efficientnet_b5': (1.6, 2.2, 456, 0.4),
-    'efficientnet_b6': (1.8, 2.6, 528, 0.5),
-    'efficientnet_b7': (2.0, 3.1, 600, 0.5),
+    "efficientnet_b0": (1.0, 1.0, 224, 0.2),
+    "efficientnet_b1": (1.0, 1.1, 240, 0.2),
+    "efficientnet_b2": (1.1, 1.2, 260, 0.3),
+    "efficientnet_b3": (1.2, 1.4, 300, 0.3),
+    "efficientnet_b4": (1.4, 1.8, 380, 0.4),
+    "efficientnet_b5": (1.6, 2.2, 456, 0.4),
+    "efficientnet_b6": (1.8, 2.6, 528, 0.5),
+    "efficientnet_b7": (2.0, 3.1, 600, 0.5),
 }
 
 
 class Swish(nn.Module):
-
     def __init__(self, *args, **kwargs):
         super(Swish, self).__init__()
 
@@ -39,12 +38,19 @@ class Swish(nn.Module):
 
 
 class ConvBNReLU(nn.Sequential):
-
     def __init__(self, in_planes, out_planes, kernel_size, stride=1, groups=1):
         padding = self._get_padding(kernel_size, stride)
         super(ConvBNReLU, self).__init__(
             nn.ZeroPad2d(padding),
-            nn.Conv2d(in_planes, out_planes, kernel_size, stride, padding=0, groups=groups, bias=False),
+            nn.Conv2d(
+                in_planes,
+                out_planes,
+                kernel_size,
+                stride,
+                padding=0,
+                groups=groups,
+                bias=False,
+            ),
             nn.BatchNorm2d(out_planes),
             Swish(),
         )
@@ -55,7 +61,6 @@ class ConvBNReLU(nn.Sequential):
 
 
 class SqueezeExcitation(nn.Module):
-
     def __init__(self, in_planes, reduced_dim):
         super(SqueezeExcitation, self).__init__()
         self.se = nn.Sequential(
@@ -71,15 +76,16 @@ class SqueezeExcitation(nn.Module):
 
 
 class MBConvBlock(nn.Module):
-
-    def __init__(self,
-                 in_planes,
-                 out_planes,
-                 expand_ratio,
-                 kernel_size,
-                 stride,
-                 reduction_ratio=4,
-                 drop_connect_rate=0.2):
+    def __init__(
+        self,
+        in_planes,
+        out_planes,
+        expand_ratio,
+        kernel_size,
+        stride,
+        reduction_ratio=4,
+        drop_connect_rate=0.2,
+    ):
         super(MBConvBlock, self).__init__()
         self.drop_connect_rate = drop_connect_rate
         self.use_residual = in_planes == out_planes and stride == 1
@@ -96,7 +102,9 @@ class MBConvBlock(nn.Module):
 
         layers += [
             # dw
-            ConvBNReLU(hidden_dim, hidden_dim, kernel_size, stride=stride, groups=hidden_dim),
+            ConvBNReLU(
+                hidden_dim, hidden_dim, kernel_size, stride=stride, groups=hidden_dim
+            ),
             # se
             SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
@@ -144,8 +152,9 @@ def _round_repeats(repeats, depth_mult):
 
 @mlconfig.register
 class EfficientNet(nn.Module):
-
-    def __init__(self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000):
+    def __init__(
+        self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000
+    ):
         super(EfficientNet, self).__init__()
 
         # yapf: disable
@@ -170,7 +179,15 @@ class EfficientNet(nn.Module):
             repeats = _round_repeats(n, depth_mult)
             for i in range(repeats):
                 stride = s if i == 0 else 1
-                features += [MBConvBlock(in_channels, out_channels, expand_ratio=t, stride=stride, kernel_size=k)]
+                features += [
+                    MBConvBlock(
+                        in_channels,
+                        out_channels,
+                        expand_ratio=t,
+                        stride=stride,
+                        kernel_size=k,
+                    )
+                ]
                 in_channels = out_channels
 
         last_channels = _round_filters(1280, width_mult)
@@ -185,7 +202,7 @@ class EfficientNet(nn.Module):
         # weight initialization
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out")
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
             elif isinstance(m, nn.BatchNorm2d):
@@ -211,9 +228,9 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
 
-        if 'num_classes' in kwargs and kwargs['num_classes'] != 1000:
-            del state_dict['classifier.1.weight']
-            del state_dict['classifier.1.bias']
+        if "num_classes" in kwargs and kwargs["num_classes"] != 1000:
+            del state_dict["classifier.1.weight"]
+            del state_dict["classifier.1.bias"]
 
         model.load_state_dict(state_dict, strict=False)
     return model
@@ -221,39 +238,39 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
 
 @mlconfig.register
 def efficientnet_b0(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b0', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b0", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b1(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b1', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b1", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b2(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b2', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b2", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b3(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b3', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b3", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b4(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b4', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b4", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b5(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b5', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b5", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b6(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b6', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b6", pretrained, progress, **kwargs)
 
 
 @mlconfig.register
 def efficientnet_b7(pretrained=False, progress=True, **kwargs):
-    return _efficientnet('efficientnet_b7', pretrained, progress, **kwargs)
+    return _efficientnet("efficientnet_b7", pretrained, progress, **kwargs)

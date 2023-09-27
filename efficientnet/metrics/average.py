@@ -4,7 +4,6 @@ from .metric import Metric
 
 
 class Average(Metric):
-
     def __init__(self):
         self.sum = 0
         self.count = 0
@@ -16,9 +15,9 @@ class Average(Metric):
     @property
     def value(self):
         if self.count == 0:
-            return float('inf')
+            return float("inf")
         else:
             return self.sum / self.count
 
     def __str__(self):
-        return '{:.4f}'.format(self.value)
+        return "{:.4f}".format(self.value)

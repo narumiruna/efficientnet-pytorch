@@ -8,7 +8,6 @@ def _to_value(other):
 
 
 class Metric(metaclass=ABCMeta):
-
     @abstractproperty
     def value(self):
         raise NotImplementedError

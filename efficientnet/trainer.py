@@ -1,19 +1,21 @@
 import os
-import shutil
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+from abc import abstractmethod
 
 import mlconfig
 import torch
 import torch.nn.functional as F
-from torch import nn, optim
+from torch import nn
+from torch import optim
 from torch.utils import data
-from tqdm import tqdm, trange
+from tqdm import tqdm
+from tqdm import trange
 
-from .metrics import Accuracy, Average
+from .metrics import Accuracy
+from .metrics import Average
 
 
 class AbstractTrainer(metaclass=ABCMeta):
-
     @abstractmethod
     def fit(self):
         raise NotImplementedError
@@ -29,10 +31,17 @@ class AbstractTrainer(metaclass=ABCMeta):
 
 @mlconfig.register
 class Trainer(AbstractTrainer):
-
-    def __init__(self, model: nn.Module, optimizer: optim.Optimizer, train_loader: data.DataLoader,
-                 valid_loader: data.DataLoader, scheduler: optim.lr_scheduler._LRScheduler, device: torch.device,
-                 num_epochs: int, output_dir: str):
+    def __init__(
+        self,
+        model: nn.Module,
+        optimizer: optim.Optimizer,
+        train_loader: data.DataLoader,
+        valid_loader: data.DataLoader,
+        scheduler: optim.lr_scheduler._LRScheduler,
+        device: torch.device,
+        num_epochs: int,
+        output_dir: str,
+    ):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -46,21 +55,22 @@ class Trainer(AbstractTrainer):
         self.best_acc = 0
 
     def fit(self):
-        epochs = trange(self.epoch, self.num_epochs + 1, desc='Epoch', ncols=0)
+        epochs = trange(self.epoch, self.num_epochs + 1, desc="Epoch", ncols=0)
         for self.epoch in epochs:
-            self.scheduler.step()
-
             train_loss, train_acc = self.train()
             valid_loss, valid_acc = self.evaluate()
+            self.scheduler.step()
 
-            self.save_checkpoint(os.path.join(self.output_dir, 'checkpoint.pth'))
+            self.save_checkpoint(os.path.join(self.output_dir, "checkpoint.pth"))
             if valid_acc > self.best_acc:
                 self.best_acc = valid_acc.value
-                self.save_checkpoint(os.path.join(self.output_dir, 'best.pth'))
+                self.save_checkpoint(os.path.join(self.output_dir, "best.pth"))
 
-            epochs.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}, '
-                                   f'valid loss: {valid_loss}, valid acc: {valid_acc}, '
-                                   f'best valid acc: {self.best_acc:.2f}')
+            epochs.set_postfix_str(
+                f"train loss: {train_loss}, train acc: {train_acc}, "
+                f"valid loss: {valid_loss}, valid acc: {valid_acc}, "
+                f"best valid acc: {self.best_acc:.2f}"
+            )
 
     def train(self):
         self.model.train()
@@ -68,7 +78,7 @@ class Trainer(AbstractTrainer):
         train_loss = Average()
         train_acc = Accuracy()
 
-        train_loader = tqdm(self.train_loader, ncols=0, desc='Train')
+        train_loader = tqdm(self.train_loader, ncols=0, desc="Train")
         for x, y in train_loader:
             x = x.to(self.device)
             y = y.to(self.device)
@@ -83,7 +93,9 @@ class Trainer(AbstractTrainer):
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(output, y)
 
-            train_loader.set_postfix_str(f'train loss: {train_loss}, train acc: {train_acc}.')
+            train_loader.set_postfix_str(
+                f"train loss: {train_loss}, train acc: {train_acc}."
+            )
 
         return train_loss, train_acc
 
@@ -94,7 +106,7 @@ class Trainer(AbstractTrainer):
         valid_acc = Accuracy()
 
         with torch.no_grad():
-            valid_loader = tqdm(self.valid_loader, desc='Validate', ncols=0)
+            valid_loader = tqdm(self.valid_loader, desc="Validate", ncols=0)
             for x, y in valid_loader:
                 x = x.to(self.device)
                 y = y.to(self.device)
@@ -105,7 +117,9 @@ class Trainer(AbstractTrainer):
                 valid_loss.update(loss.item(), number=x.size(0))
                 valid_acc.update(output, y)
 
-                valid_loader.set_postfix_str(f'valid loss: {valid_loss}, valid acc: {valid_acc}.')
+                valid_loader.set_postfix_str(
+                    f"valid loss: {valid_loss}, valid acc: {valid_acc}."
+                )
 
         return valid_loss, valid_acc
 
@@ -113,11 +127,11 @@ class Trainer(AbstractTrainer):
         self.model.eval()
 
         checkpoint = {
-            'model': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'scheduler': self.scheduler.state_dict(),
-            'epoch': self.epoch,
-            'best_acc': self.best_acc
+            "model": self.model.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "scheduler": self.scheduler.state_dict(),
+            "epoch": self.epoch,
+            "best_acc": self.best_acc,
         }
 
         dirname = os.path.dirname(f)
@@ -129,9 +143,9 @@ class Trainer(AbstractTrainer):
     def resume(self, f):
         checkpoint = torch.load(f, map_location=self.device)
 
-        self.model.load_state_dict(checkpoint['model'])
-        self.optimizer.load_state_dict(checkpoint['optimizer'])
-        self.scheduler.load_state_dict(checkpoint['scheduler'])
+        self.model.load_state_dict(checkpoint["model"])
+        self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.scheduler.load_state_dict(checkpoint["scheduler"])
 
-        self.epoch = checkpoint['epoch'] + 1
-        self.best_acc = checkpoint['best_acc']
+        self.epoch = checkpoint["epoch"] + 1
+        self.best_acc = checkpoint["best_acc"]
