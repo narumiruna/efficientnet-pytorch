@@ -1,11 +1,9 @@
-from .efficientnet import (
-    EfficientNet,
-    efficientnet_b0,
-    efficientnet_b1,
-    efficientnet_b2,
-    efficientnet_b3,
-    efficientnet_b4,
-    efficientnet_b5,
-    efficientnet_b6,
-    efficientnet_b7,
-)
+from .efficientnet import EfficientNet
+from .efficientnet import efficientnet_b0
+from .efficientnet import efficientnet_b1
+from .efficientnet import efficientnet_b2
+from .efficientnet import efficientnet_b3
+from .efficientnet import efficientnet_b4
+from .efficientnet import efficientnet_b5
+from .efficientnet import efficientnet_b6
+from .efficientnet import efficientnet_b7

@@ -31,16 +31,16 @@ params = {
 
 class Swish(nn.Module):
     def __init__(self, *args, **kwargs):
-        super(Swish, self).__init__()
+        super().__init__()
 
     def forward(self, x):
         return x * torch.sigmoid(x)
 
 
 class ConvBNReLU(nn.Sequential):
-    def __init__(self, in_planes, out_planes, kernel_size, stride=1, groups=1):
+    def __init__(self, in_planes: int, out_planes: int, kernel_size: int, stride: int = 1, groups: int = 1) -> None:
         padding = self._get_padding(kernel_size, stride)
-        super(ConvBNReLU, self).__init__(
+        super().__init__(
             nn.ZeroPad2d(padding),
             nn.Conv2d(
                 in_planes,
@@ -61,8 +61,8 @@ class ConvBNReLU(nn.Sequential):
 
 
 class SqueezeExcitation(nn.Module):
-    def __init__(self, in_planes, reduced_dim):
-        super(SqueezeExcitation, self).__init__()
+    def __init__(self, in_planes: int, reduced_dim: int) -> None:
+        super().__init__()
         self.se = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(in_planes, reduced_dim, 1),
@@ -71,22 +71,22 @@ class SqueezeExcitation(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x * self.se(x)
 
 
 class MBConvBlock(nn.Module):
     def __init__(
         self,
-        in_planes,
-        out_planes,
-        expand_ratio,
-        kernel_size,
-        stride,
-        reduction_ratio=4,
-        drop_connect_rate=0.2,
-    ):
-        super(MBConvBlock, self).__init__()
+        in_planes: int,
+        out_planes: int,
+        expand_ratio: int,
+        kernel_size: int,
+        stride: int,
+        reduction_ratio: int = 4,
+        drop_connect_rate: int = 0.2,
+    ) -> None:
+        super().__init__()
         self.drop_connect_rate = drop_connect_rate
         self.use_residual = in_planes == out_planes and stride == 1
         assert stride in [1, 2]
@@ -102,9 +102,7 @@ class MBConvBlock(nn.Module):
 
         layers += [
             # dw
-            ConvBNReLU(
-                hidden_dim, hidden_dim, kernel_size, stride=stride, groups=hidden_dim
-            ),
+            ConvBNReLU(hidden_dim, hidden_dim, kernel_size, stride=stride, groups=hidden_dim),
             # se
             SqueezeExcitation(hidden_dim, reduced_dim),
             # pw-linear
@@ -114,7 +112,7 @@ class MBConvBlock(nn.Module):
 
         self.conv = nn.Sequential(*layers)
 
-    def _drop_connect(self, x):
+    def _drop_connect(self, x: torch.Tensor) -> torch.Tensor:
         if not self.training:
             return x
         keep_prob = 1.0 - self.drop_connect_rate
@@ -124,7 +122,7 @@ class MBConvBlock(nn.Module):
         binary_tensor = random_tensor.floor()
         return x.div(keep_prob) * binary_tensor
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.use_residual:
             return x + self._drop_connect(self.conv(x))
         else:
@@ -153,9 +151,9 @@ def _round_repeats(repeats, depth_mult):
 @mlconfig.register
 class EfficientNet(nn.Module):
     def __init__(
-        self, width_mult=1.0, depth_mult=1.0, dropout_rate=0.2, num_classes=1000
-    ):
-        super(EfficientNet, self).__init__()
+        self, width_mult: float = 1.0, depth_mult: float = 1.0, dropout_rate: float = 0.2, num_classes: int = 1000
+    ) -> None:
+        super().__init__()
 
         # yapf: disable
         settings = [

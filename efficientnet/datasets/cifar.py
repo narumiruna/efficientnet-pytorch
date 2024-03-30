@@ -1,22 +1,15 @@
 import mlconfig
 from torch.utils import data
-from torchvision import datasets, transforms
+from torchvision import datasets
+from torchvision import transforms
 
 
 @mlconfig.register
 class CIFAR10DataLoader(data.DataLoader):
     def __init__(
-        self,
-        root: str,
-        image_size: int,
-        train: bool,
-        batch_size: int,
-        shuffle: bool = True,
-        **kwargs
-    ):
-        normalize = transforms.Normalize(
-            mean=(0.4914, 0.4822, 0.4465), std=(0.2470, 0.2435, 0.2616)
-        )
+        self, root: str, image_size: int, train: bool, batch_size: int, shuffle: bool = True, **kwargs
+    ) -> None:
+        normalize = transforms.Normalize(mean=(0.4914, 0.4822, 0.4465), std=(0.2470, 0.2435, 0.2616))
 
         if train:
             transform = transforms.Compose(
@@ -37,10 +30,6 @@ class CIFAR10DataLoader(data.DataLoader):
                 ]
             )
 
-        dataset = datasets.CIFAR10(
-            root, train=train, transform=transform, download=True
-        )
+        dataset = datasets.CIFAR10(root, train=train, transform=transform, download=True)
 
-        super(CIFAR10DataLoader, self).__init__(
-            dataset=dataset, batch_size=batch_size, shuffle=shuffle, **kwargs
-        )
+        super().__init__(dataset=dataset, batch_size=batch_size, shuffle=shuffle, **kwargs)

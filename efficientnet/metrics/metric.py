@@ -1,4 +1,5 @@
-from abc import ABCMeta, abstractproperty
+from abc import ABCMeta
+from abc import abstractproperty
 
 
 def _to_value(other):

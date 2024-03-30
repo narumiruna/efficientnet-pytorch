@@ -4,22 +4,22 @@ import warnings
 import mlconfig
 from PIL import Image
 from torch.utils import data
-from torchvision import datasets, transforms
+from torch.utils.data import DistributedSampler
+from torchvision import datasets
+from torchvision import transforms
 
 from ..utils import distributed_is_initialized
 
 
-class PadCenterCrop(object):
-    def __init__(self, size, crop_padding=32, interpolation=Image.BILINEAR):
+class PadCenterCrop:
+    def __init__(self, size: int, crop_padding: int = 32, interpolation=Image.BILINEAR) -> None:
         self.size = size
         self.crop_padding = crop_padding
         self.interpolation = interpolation
 
-    def __call__(self, img):
+    def __call__(self, img: Image.Image) -> Image.Image:
         w, h = img.size
-        padded_center_crop_size = int(
-            (self.size / (self.size + self.crop_padding)) * min(w, h)
-        )
+        padded_center_crop_size = int((self.size / (self.size + self.crop_padding)) * min(w, h))
         offset_h = (h - padded_center_crop_size + 1) // 2
         offset_w = (w - padded_center_crop_size + 1) // 2
         box = (
@@ -34,21 +34,15 @@ class PadCenterCrop(object):
 
 @mlconfig.register
 class ImageNetDataLoader(data.DataLoader):
-    def __init__(
-        self, root: str, image_size: int, train: bool, batch_size: int, **kwargs
-    ):
-        normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-        )
+    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs):
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
         warnings.filterwarnings("ignore", category=UserWarning)
 
         if train:
             transform = transforms.Compose(
                 [
-                    transforms.RandomResizedCrop(
-                        image_size, interpolation=Image.BICUBIC
-                    ),
+                    transforms.RandomResizedCrop(image_size, interpolation=Image.BICUBIC),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     normalize,
@@ -69,12 +63,6 @@ class ImageNetDataLoader(data.DataLoader):
 
         sampler = None
         if train and distributed_is_initialized():
-            sampler = data.distributed.DistributedSampler(dataset)
+            sampler = DistributedSampler(dataset)
 
-        super(ImageNetDataLoader, self).__init__(
-            dataset,
-            batch_size=batch_size,
-            shuffle=(sampler is None),
-            sampler=sampler,
-            **kwargs
-        )
+        super().__init__(dataset, batch_size=batch_size, shuffle=(sampler is None), sampler=sampler, **kwargs)

@@ -93,9 +93,7 @@ class Trainer(AbstractTrainer):
             train_loss.update(loss.item(), number=x.size(0))
             train_acc.update(output, y)
 
-            train_loader.set_postfix_str(
-                f"train loss: {train_loss}, train acc: {train_acc}."
-            )
+            train_loader.set_postfix_str(f"train loss: {train_loss}, train acc: {train_acc}.")
 
         return train_loss, train_acc
 
@@ -117,9 +115,7 @@ class Trainer(AbstractTrainer):
                 valid_loss.update(loss.item(), number=x.size(0))
                 valid_acc.update(output, y)
 
-                valid_loader.set_postfix_str(
-                    f"valid loss: {valid_loss}, valid acc: {valid_acc}."
-                )
+                valid_loader.set_postfix_str(f"valid loss: {valid_loss}, valid acc: {valid_acc}.")
 
         return valid_loss, valid_acc
 
