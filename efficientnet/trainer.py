@@ -3,7 +3,6 @@ import os
 import mlconfig
 import torch
 import torch.nn.functional as F
-from torch import nn
 from torch import optim
 from torch.utils import data
 from torchmetrics import Accuracy
@@ -11,12 +10,14 @@ from torchmetrics import MeanMetric
 from tqdm import tqdm
 from tqdm import trange
 
+from .models import EfficientNet
+
 
 @mlconfig.register
 class Trainer:
     def __init__(
         self,
-        model: nn.Module,
+        model: EfficientNet,
         optimizer: optim.Optimizer,
         train_loader: data.DataLoader,
         valid_loader: data.DataLoader,
