@@ -154,6 +154,7 @@ class EfficientNet(nn.Module):
         self, width_mult: float = 1.0, depth_mult: float = 1.0, dropout_rate: float = 0.2, num_classes: int = 1000
     ) -> None:
         super().__init__()
+        self.num_classes = num_classes
 
         # yapf: disable
         settings = [
