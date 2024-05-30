@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torch import optim
 from torch.utils import data
 from torchmetrics import MeanMetric
+from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassAccuracy
 from tqdm import tqdm
 from tqdm import trange
@@ -39,32 +40,41 @@ class Trainer:
 
         self.epoch = 1
         self.best_acc = 0
+        self.metrics = MetricCollection(
+            {
+                "train_loss": MeanMetric(),
+                "train_acc": MulticlassAccuracy(num_classes=self.num_classes),
+                "valid_loss": MeanMetric(),
+                "valid_acc": MulticlassAccuracy(num_classes=self.num_classes),
+            }
+        )
+
+    def format_metrics(self) -> str:
+        return
 
     def fit(self) -> None:
-        epochs = trange(self.epoch, self.num_epochs + 1, desc="Epoch", ncols=0)
+        epochs = trange(self.epoch, self.num_epochs + 1, desc="Epoch")
         for self.epoch in epochs:
-            train_loss, train_acc = self.train()
-            valid_loss, valid_acc = self.validate()
+            self.train()
+            self.validate()
             self.scheduler.step()
 
             self.save_checkpoint(os.path.join(self.output_dir, "checkpoint.pth"))
+            valid_acc = float(self.metrics["valid_acc"].compute())
             if valid_acc > self.best_acc:
                 self.best_acc = valid_acc
                 self.save_checkpoint(os.path.join(self.output_dir, "best.pth"))
 
-            epochs.set_postfix_str(
-                f"train loss: {train_loss:.4f}, train acc: {train_acc:.4f}, "
-                f"valid loss: {valid_loss:.4f}, valid acc: {valid_acc:.4f}, "
-                f"best valid acc: {self.best_acc:.4f}"
-            )
+            format_string = f"Epoch: {self.epoch}/{self.num_epochs}"
+            for k, v in self.metrics.items():
+                format_string += f", {k}: {v.compute():.4f}"
+            format_string += f", best acc: {self.best_acc:.4f}\n"
+            tqdm.write(format_string)
 
-    def train(self) -> tuple[float, float]:
+    def train(self) -> None:
         self.model.train()
 
-        loss_metric = MeanMetric()
-        acc_metric = MulticlassAccuracy(num_classes=self.num_classes)
-
-        train_loader = tqdm(self.train_loader, ncols=0, desc="Train")
+        train_loader = tqdm(self.train_loader, desc="Train")
         for x, y in train_loader:
             x = x.to(self.device)
             y = y.to(self.device)
@@ -76,25 +86,14 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
 
-            loss_metric.update(loss.item(), weight=x.size(0))
-            acc_metric.update(output.cpu(), y.cpu())
-
-            train_loss = float(loss_metric.compute())
-            train_acc = float(acc_metric.compute())
-            train_loader.set_postfix_str(f"train loss: {train_loss:.4f}, train acc: {train_acc:.4f}.")
-
-        train_loss = float(loss_metric.compute())
-        train_acc = float(acc_metric.compute())
-        return train_loss, train_acc
+            self.metrics["train_loss"].update(loss.item(), weight=x.size(0))
+            self.metrics["train_acc"].update(output.cpu(), y.cpu())
 
     @torch.no_grad()
-    def validate(self) -> tuple[float, float]:
+    def validate(self) -> None:
         self.model.eval()
 
-        loss_metric = MeanMetric()
-        acc_metric = MulticlassAccuracy(num_classes=self.num_classes)
-
-        valid_loader = tqdm(self.valid_loader, desc="Validate", ncols=0)
+        valid_loader = tqdm(self.valid_loader, desc="Validate")
         for x, y in valid_loader:
             x = x.to(self.device)
             y = y.to(self.device)
@@ -102,16 +101,8 @@ class Trainer:
             output = self.model(x)
             loss = F.cross_entropy(output, y)
 
-            loss_metric.update(loss.item(), weight=x.size(0))
-            acc_metric.update(output.cpu(), y.cpu())
-
-            valid_loss = float(loss_metric.compute())
-            valid_acc = float(acc_metric.compute())
-            valid_loader.set_postfix_str(f"valid loss: {valid_loss:.4f}, valid acc: {valid_acc:.4f}.")
-
-        valid_loss = float(loss_metric.compute())
-        valid_acc = float(acc_metric.compute())
-        return valid_loss, valid_acc
+            self.metrics["valid_loss"].update(loss.item(), weight=x.size(0))
+            self.metrics["valid_acc"].update(output.cpu(), y.cpu())
 
     def save_checkpoint(self, f: str) -> None:
         self.model.eval()
