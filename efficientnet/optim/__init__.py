@@ -1,11 +1,7 @@
-import mlconfig
-from torch import optim
+from mlconfig.torch import register_torch_optimizers
+from mlconfig.torch import register_torch_schedulers
 
 from .rmsprop import TFRMSprop
 
-mlconfig.register(optim.SGD)
-mlconfig.register(optim.Adam)
-
-mlconfig.register(optim.lr_scheduler.MultiStepLR)
-mlconfig.register(optim.lr_scheduler.StepLR)
-mlconfig.register(optim.lr_scheduler.ExponentialLR)
+register_torch_optimizers()
+register_torch_schedulers()
