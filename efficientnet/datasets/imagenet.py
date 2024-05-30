@@ -1,18 +1,19 @@
-import os
 import warnings
 
 import mlconfig
 from PIL import Image
-from torch.utils import data
+from torch.utils.data import DataLoader
 from torch.utils.data import DistributedSampler
-from torchvision import datasets
 from torchvision import transforms
+from torchvision.datasets import ImageNet
 
 from ..utils import distributed_is_initialized
 
 
 class PadCenterCrop:
-    def __init__(self, size: int, crop_padding: int = 32, interpolation=Image.BILINEAR) -> None:
+    def __init__(
+        self, size: int, crop_padding: int = 32, interpolation: Image.Resampling = Image.Resampling.BILINEAR
+    ) -> None:
         self.size = size
         self.crop_padding = crop_padding
         self.interpolation = interpolation
@@ -33,8 +34,8 @@ class PadCenterCrop:
 
 
 @mlconfig.register
-class ImageNetDataLoader(data.DataLoader):
-    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs):
+class ImageNetDataLoader(DataLoader):
+    def __init__(self, root: str, image_size: int, train: bool, batch_size: int, **kwargs) -> None:
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
         warnings.filterwarnings("ignore", category=UserWarning)
@@ -42,7 +43,7 @@ class ImageNetDataLoader(data.DataLoader):
         if train:
             transform = transforms.Compose(
                 [
-                    transforms.RandomResizedCrop(image_size, interpolation=Image.BICUBIC),
+                    transforms.RandomResizedCrop(image_size, interpolation=Image.Resampling.BICUBIC),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     normalize,
@@ -51,15 +52,14 @@ class ImageNetDataLoader(data.DataLoader):
         else:
             transform = transforms.Compose(
                 [
-                    transforms.Resize(image_size + 32, interpolation=Image.BICUBIC),
+                    transforms.Resize(image_size + 32, interpolation=Image.Resampling.BICUBIC),
                     transforms.CenterCrop(image_size),
                     transforms.ToTensor(),
                     normalize,
                 ]
             )
 
-        phase = "train" if train else "val"
-        dataset = datasets.ImageFolder(os.path.join(root, phase), transform=transform)
+        dataset = ImageNet(root, split="train" if train else "val", transform=transform)
 
         sampler = None
         if train and distributed_is_initialized():

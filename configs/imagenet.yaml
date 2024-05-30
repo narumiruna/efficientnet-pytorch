@@ -9,7 +9,7 @@ model:
 
 dataset:
   name: ImageNetDataLoader
-  root: data
+  root: data/ILSVRC2012
   batch_size: 32
   image_size: 224
   num_workers: 16
