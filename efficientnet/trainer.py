@@ -5,8 +5,8 @@ import torch
 import torch.nn.functional as F
 from torch import optim
 from torch.utils import data
-from torchmetrics import Accuracy
 from torchmetrics import MeanMetric
+from torchmetrics.classification import MulticlassAccuracy
 from tqdm import tqdm
 from tqdm import trange
 
@@ -61,8 +61,8 @@ class Trainer:
     def train(self) -> tuple[float, float]:
         self.model.train()
 
-        loss_metric = MeanMetric().to(self.device)
-        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes).to(self.device)
+        loss_metric = MeanMetric()
+        acc_metric = MulticlassAccuracy(num_classes=self.num_classes)
 
         train_loader = tqdm(self.train_loader, ncols=0, desc="Train")
         for x, y in train_loader:
@@ -79,11 +79,11 @@ class Trainer:
             loss_metric.update(loss.item(), weight=x.size(0))
             acc_metric.update(output.cpu(), y.cpu())
 
-            train_loss = float(loss_metric.compute().item())
+            train_loss = float(loss_metric.compute())
             train_acc = float(acc_metric.compute())
             train_loader.set_postfix_str(f"train loss: {train_loss:.4f}, train acc: {train_acc:.4f}.")
 
-        train_loss = float(loss_metric.compute().item())
+        train_loss = float(loss_metric.compute())
         train_acc = float(acc_metric.compute())
         return train_loss, train_acc
 
@@ -91,8 +91,8 @@ class Trainer:
     def validate(self) -> tuple[float, float]:
         self.model.eval()
 
-        loss_metric = MeanMetric().to(self.device)
-        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes).to(self.device)
+        loss_metric = MeanMetric()
+        acc_metric = MulticlassAccuracy(num_classes=self.num_classes)
 
         valid_loader = tqdm(self.valid_loader, desc="Validate", ncols=0)
         for x, y in valid_loader:
@@ -103,13 +103,13 @@ class Trainer:
             loss = F.cross_entropy(output, y)
 
             loss_metric.update(loss.item(), weight=x.size(0))
-            acc_metric.update(output, y)
+            acc_metric.update(output.cpu(), y.cpu())
 
-            valid_loss = float(loss_metric.compute().item())
+            valid_loss = float(loss_metric.compute())
             valid_acc = float(acc_metric.compute())
             valid_loader.set_postfix_str(f"valid loss: {valid_loss:.4f}, valid acc: {valid_acc:.4f}.")
 
-        valid_loss = float(loss_metric.compute().item())
+        valid_loss = float(loss_metric.compute())
         valid_acc = float(acc_metric.compute())
         return valid_loss, valid_acc
 
