@@ -213,7 +213,7 @@ class EfficientNet(nn.Module):
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
         x = x.mean([2, 3])
         x = self.classifier(x)

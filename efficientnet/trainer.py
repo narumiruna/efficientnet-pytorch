@@ -21,7 +21,7 @@ class Trainer:
         optimizer: optim.Optimizer,
         train_loader: data.DataLoader,
         valid_loader: data.DataLoader,
-        scheduler: optim.lr_scheduler._LRScheduler,
+        scheduler: optim.lr_scheduler.LRScheduler,
         device: torch.device,
         num_epochs: int,
         output_dir: str,
@@ -49,20 +49,20 @@ class Trainer:
 
             self.save_checkpoint(os.path.join(self.output_dir, "checkpoint.pth"))
             if valid_acc > self.best_acc:
-                self.best_acc = valid_acc.value
+                self.best_acc = valid_acc
                 self.save_checkpoint(os.path.join(self.output_dir, "best.pth"))
 
             epochs.set_postfix_str(
-                f"train loss: {train_loss}, train acc: {train_acc}, "
-                f"valid loss: {valid_loss}, valid acc: {valid_acc}, "
-                f"best valid acc: {self.best_acc:.2f}"
+                f"train loss: {train_loss:.4f}, train acc: {train_acc:.4f}, "
+                f"valid loss: {valid_loss:.4f}, valid acc: {valid_acc:.4f}, "
+                f"best valid acc: {self.best_acc:.4f}"
             )
 
     def train(self) -> tuple[float, float]:
         self.model.train()
 
-        loss_metric = MeanMetric()
-        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes)
+        loss_metric = MeanMetric().to(self.device)
+        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes).to(self.device)
 
         train_loader = tqdm(self.train_loader, ncols=0, desc="Train")
         for x, y in train_loader:
@@ -79,18 +79,20 @@ class Trainer:
             loss_metric.update(loss.item(), weight=x.size(0))
             acc_metric.update(output.cpu(), y.cpu())
 
-            train_loader.set_postfix_str(
-                f"train loss: {loss_metric.compute().item():.4f}, train acc: {acc_metric.compute().item():.4f}."
-            )
+            train_loss = float(loss_metric.compute().item())
+            train_acc = float(acc_metric.compute())
+            train_loader.set_postfix_str(f"train loss: {train_loss:.4f}, train acc: {train_acc:.4f}.")
 
-        return loss_metric.compute().item(), acc_metric.compute().item()
+        train_loss = float(loss_metric.compute().item())
+        train_acc = float(acc_metric.compute())
+        return train_loss, train_acc
 
     @torch.no_grad()
     def validate(self) -> tuple[float, float]:
         self.model.eval()
 
-        loss_metric = MeanMetric()
-        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes)
+        loss_metric = MeanMetric().to(self.device)
+        acc_metric = Accuracy(task="multiclass", num_classes=self.num_classes).to(self.device)
 
         valid_loader = tqdm(self.valid_loader, desc="Validate", ncols=0)
         for x, y in valid_loader:
@@ -103,11 +105,13 @@ class Trainer:
             loss_metric.update(loss.item(), weight=x.size(0))
             acc_metric.update(output, y)
 
-            valid_loader.set_postfix_str(
-                f"valid loss: {loss_metric.compute().float():.4f}, valid acc: {acc_metric.compute().item():.4f}."
-            )
+            valid_loss = float(loss_metric.compute().item())
+            valid_acc = float(acc_metric.compute())
+            valid_loader.set_postfix_str(f"valid loss: {valid_loss:.4f}, valid acc: {valid_acc:.4f}.")
 
-        return loss_metric.compute().float(), acc_metric.compute().item()
+        valid_loss = float(loss_metric.compute().item())
+        valid_acc = float(acc_metric.compute())
+        return valid_loss, valid_acc
 
     def save_checkpoint(self, f: str) -> None:
         self.model.eval()
