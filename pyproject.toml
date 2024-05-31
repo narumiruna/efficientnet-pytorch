@@ -39,9 +39,11 @@ select = [
 
 ]
 ignore = ["N812"]
+exclude = ["tf_to_torch/*"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "F403"]
+"hubconf.py" = ["F401"]
 
 [tool.ruff.lint.isort]
 force-single-line = true

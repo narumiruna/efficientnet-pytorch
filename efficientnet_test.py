@@ -1,6 +1,7 @@
 import torch
 
-from efficientnet.models.efficientnet import EfficientNet, params
+from efficientnet.models.efficientnet import EfficientNet
+from efficientnet.models.efficientnet import params
 
 
 def numel(model):
