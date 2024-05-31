@@ -6,12 +6,12 @@ from torch import nn
 from torch.hub import load_state_dict_from_url
 
 model_urls = {
-    "efficientnet_b0": "https://www.dropbox.com/s/9wigibun8n260qm/efficientnet-b0-4cfa50.pth?dl=1",
-    "efficientnet_b1": "https://www.dropbox.com/s/6745ear79b1ltkh/efficientnet-b1-ef6aa7.pth?dl=1",
-    "efficientnet_b2": "https://www.dropbox.com/s/0dhtv1t5wkjg0iy/efficientnet-b2-7c98aa.pth?dl=1",
-    "efficientnet_b3": "https://www.dropbox.com/s/5uqok5gd33fom5p/efficientnet-b3-bdc7f4.pth?dl=1",
-    "efficientnet_b4": "https://www.dropbox.com/s/y2nqt750lixs8kc/efficientnet-b4-3e4967.pth?dl=1",
-    "efficientnet_b5": "https://www.dropbox.com/s/qxonlu3q02v9i47/efficientnet-b5-4c7978.pth?dl=1",
+    "efficientnet_b0": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b0-4cfa50.pth",
+    "efficientnet_b1": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b1-ef6aa7.pth",
+    "efficientnet_b2": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b2-7c98aa.pth",
+    "efficientnet_b3": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b3-bdc7f4.pth",
+    "efficientnet_b4": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b4-3e4967.pth",
+    "efficientnet_b5": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b5-4c7978.pth",
     "efficientnet_b6": None,
     "efficientnet_b7": None,
 }

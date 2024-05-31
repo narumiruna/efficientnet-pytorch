@@ -43,9 +43,7 @@ def main():
     if args.world_size > 1:
         init_process(args.backend, args.init_method, args.world_size, args.rank)
 
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu"
-    )
+    device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
 
     model = mlconfig.instantiate(config.model)
     if distributed_is_initialized():
