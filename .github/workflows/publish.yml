@@ -16,7 +16,7 @@ jobs:
         poetry-version: ["1.8.2"]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: poetry
