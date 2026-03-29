@@ -3,35 +3,28 @@ name: Python
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   python:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
       matrix:
-        python-version: ["3.11"]
-        poetry-version: ["1.8.3"]
+        python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v6
-      - name: Install poetry
-        run: pipx install poetry==${{ matrix.poetry-version }}
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-          cache: poetry
       - name: Install dependencies
-        run: poetry install
+        run: uv sync
       - name: Lint
-        run: poetry run ruff check efficientnet
-    #   - name: Type check
-    #     run: poetry run mypy --install-types --non-interactive .
-    #   - name: Test
-    #     run: poetry run pytest -v -s --cov=efficientnet --cov-report=xml tests
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: uv run ruff check .
+      - name: Type check
+        run: uv run ty check .
+      # - name: Test
+      #   run: uv run pytest -v -s --cov=src --cov-report=xml tests

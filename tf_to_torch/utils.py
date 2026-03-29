@@ -55,7 +55,7 @@ def build_learning_rate(
     else:
         assert False, "Unknown lr_decay_type : %s" % lr_decay_type
 
-    if warmup_epochs:
+    if warmup_epochs and steps_per_epoch:
         tf.logging.info("Learning rate warmup_epochs: %d" % warmup_epochs)
         warmup_steps = int(warmup_epochs * steps_per_epoch)
         warmup_lr = (
