@@ -5,12 +5,11 @@ import torch
 import torch.nn.functional as F
 from torch import optim
 from torch.utils import data
-from torchmetrics import MeanMetric
-from torchmetrics import MetricCollection
-from torchmetrics.classification import MulticlassAccuracy
 from tqdm import tqdm
 from tqdm import trange
 
+from .metric import Accuracy
+from .metric import MeanMetric
 from .models import EfficientNet
 
 
@@ -40,34 +39,29 @@ class Trainer:
 
         self.epoch = 1
         self.best_acc = 0
-        self.metrics = MetricCollection(
-            {
-                "train_loss": MeanMetric(),
-                "train_acc": MulticlassAccuracy(num_classes=self.num_classes),
-                "valid_loss": MeanMetric(),
-                "valid_acc": MulticlassAccuracy(num_classes=self.num_classes),
-            }
-        )
 
-    def format_metrics(self) -> str:
-        return
+        self.train_loss = MeanMetric()
+        self.train_acc = Accuracy()
+        self.valid_loss = MeanMetric()
+        self.valid_acc = Accuracy()
 
     def fit(self) -> None:
         epochs = trange(self.epoch, self.num_epochs + 1, desc="Epoch")
         for self.epoch in epochs:
             self.train()
             self.validate()
-            self.scheduler.step()
 
             self.save_checkpoint(os.path.join(self.output_dir, "checkpoint.pth"))
-            valid_acc = float(self.metrics["valid_acc"].compute())
+            valid_acc = float(self.valid_acc.compute())
             if valid_acc > self.best_acc:
                 self.best_acc = valid_acc
                 self.save_checkpoint(os.path.join(self.output_dir, "best.pth"))
 
             format_string = f"Epoch: {self.epoch}/{self.num_epochs}"
-            for k, v in self.metrics.items():
-                format_string += f", {k}: {v.compute():.4f}"
+            format_string += f", train_loss: {self.train_loss.compute():.4f}"
+            format_string += f", train_acc: {self.train_acc.compute():.4f}"
+            format_string += f", valid_loss: {self.valid_loss.compute():.4f}"
+            format_string += f", valid_acc: {self.valid_acc.compute():.4f}"
             format_string += f", best acc: {self.best_acc:.4f}\n"
             tqdm.write(format_string)
 
@@ -86,8 +80,9 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
 
-            self.metrics["train_loss"].update(loss.item(), weight=x.size(0))
-            self.metrics["train_acc"].update(output.cpu(), y.cpu())
+            self.train_loss.update(loss.item(), weight=x.size(0))
+            self.train_acc.update(output.cpu(), y.cpu())
+        self.scheduler.step()
 
     @torch.no_grad()
     def validate(self) -> None:
@@ -101,8 +96,8 @@ class Trainer:
             output = self.model(x)
             loss = F.cross_entropy(output, y)
 
-            self.metrics["valid_loss"].update(loss.item(), weight=x.size(0))
-            self.metrics["valid_acc"].update(output.cpu(), y.cpu())
+            self.valid_loss.update(loss.item(), weight=x.size(0))
+            self.valid_acc.update(output.cpu(), y.cpu())
 
     def save_checkpoint(self, f: str) -> None:
         self.model.eval()

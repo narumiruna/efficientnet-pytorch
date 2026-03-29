@@ -30,7 +30,7 @@ class PadCenterCrop:
             offset_h + padded_center_crop_size,
         )
         crop_img = img.crop(box)
-        return crop_img.resize(self.size, self.interpolation)
+        return crop_img.resize([self.size, self.size], self.interpolation)
 
 
 @mlconfig.register

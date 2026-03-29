@@ -5,7 +5,7 @@ import torch
 from torch import nn
 from torch.hub import load_state_dict_from_url
 
-model_urls = {
+model_urls: dict[str, str | None] = {
     "efficientnet_b0": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b0-4cfa50.pth",
     "efficientnet_b1": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b1-ef6aa7.pth",
     "efficientnet_b2": "https://github.com/narumiruna/efficientnet-pytorch/releases/download/weights-20190712/efficientnet-b2-7c98aa.pth",
@@ -83,7 +83,7 @@ class MBConvBlock(nn.Module):
         kernel_size: int,
         stride: int,
         reduction_ratio: int = 4,
-        drop_connect_rate: int = 0.2,
+        drop_connect_rate: float = 0.2,
     ) -> None:
         super().__init__()
         self.drop_connect_rate = drop_connect_rate
@@ -169,7 +169,7 @@ class EfficientNet(nn.Module):
         # yapf: enable
 
         out_channels = _round_filters(32, width_mult)
-        features = [ConvBNReLU(3, out_channels, 3, stride=2)]
+        features: list[nn.Module] = [ConvBNReLU(3, out_channels, 3, stride=2)]
 
         in_channels = out_channels
         for t, c, n, s, k in settings:
@@ -224,7 +224,10 @@ def _efficientnet(arch, pretrained, progress, **kwargs):
     width_mult, depth_mult, _, dropout_rate = params[arch]
     model = EfficientNet(width_mult, depth_mult, dropout_rate, **kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+        model_url = model_urls[arch]
+        if model_url is None:
+            raise ValueError(f"No pretrained weights available for {arch}.")
+        state_dict = load_state_dict_from_url(model_url, progress=progress)
 
         if "num_classes" in kwargs and kwargs["num_classes"] != 1000:
             del state_dict["classifier.1.weight"]
