@@ -4,12 +4,7 @@ https://arxiv.org/abs/1905.11946
 
 ## Prerequisites
 
-- Ubuntu
-- Python 3
-  - torch 1.0.1
-  - torchvision 0.2.2.post3
-  - tqdm
-  - mlconfig
+- Python >= 3.12
 
 ## Usage
 
