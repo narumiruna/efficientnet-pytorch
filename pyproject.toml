@@ -6,18 +6,18 @@ readme          = "README.md"
 requires-python = ">=3.12"
 authors         = [{ name = "narumi", email = "toucans-cutouts0f@icloud.com" }]
 dependencies    = [
-  "mlconfig>=0.3.2",
-  "torch>=2.13.0",
-  "torchvision>=0.26.0",
-  "tqdm>=4.67.3",
+  "mlconfig>=0.4.0",
+  "torch>=2.14.1",
+  "torchvision>=0.29.1",
+  "tqdm>=4.70.1",
 ]
 
 [dependency-groups]
 dev = [
-  "pytest>=9.0.3",
+  "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
-  "ruff>=0.15.8",
-  "ty>=0.0.26",
+  "ruff>=0.17.2",
+  "ty>=0.0.91",
 ]
 
 [build-system]
